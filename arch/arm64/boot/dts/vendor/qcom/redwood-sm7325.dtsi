@@ -170,21 +170,14 @@
 		compatible = "awinic,aw882xx_smartpa";
 		reg = <0x35>;
 		irq-gpio = <&tlmm 102 0>;
-		spk-sw-gpio = <&tlmm 101 0>;
 		interrupt-parent = <&tlmm>;
 		interrupts = <102 0>;
 		interrupt-names = "smartpa_irq";
 		pinctrl-names = "default", "sleep";
 		pinctrl-0 = <&top_smartpa_int_active>;
 		pinctrl-1 = <&top_smartpa_int_suspend>;
-		monitor-flag = <1>;
-		dc-flag = <0>;
-		aw-tx-topo-id = <0x1000ff01>;
-		aw-rx-topo-id = <0x1000ff00>;
-		aw-tx-port-id = <0x9001>;
-		aw-rx-port-id = <0x9000>;
 		aw-re-min = <4000>;
-		aw-re-max= <9000>;
+		aw-re-max = <30000>;
 		aw-cali-mode = "aw_class";
 		sound-channel = <0>;
 		status = "ok";
@@ -201,14 +194,8 @@
 		pinctrl-names = "default", "sleep";
 		pinctrl-0 = <&bot_smartpa_int_active>;
 		pinctrl-1 = <&bot_smartpa_int_suspend>;
-		monitor-flag = <1>;
-		dc-flag = <0>;
-		aw-tx-topo-id = <0x1000ff01>;
-		aw-rx-topo-id = <0x1000ff00>;
-		aw-tx-port-id = <0x9001>;
-		aw-rx-port-id = <0x9000>;
 		aw-re-min = <4000>;
-		aw-re-max= <9000>;
+		aw-re-max = <30000>;
 		aw-cali-mode = "aw_class";
 		sound-channel = <1>;
 		status = "ok";
@@ -433,7 +420,7 @@
 	pinctrl-1 = <&qupv3_se13_spi_sleep &qupv3_se13_spi_sleep_cs>;
 
 	xiaomi_m20_touch@0 {
-		compatible = "xiaomi,gt9916r-spi";
+		compatible = "goodix,brl-d";
 		reg = <0>;
 		spi-max-frequency = <5000000>;
 		interrupt-parent = <&tlmm>;
@@ -448,6 +435,7 @@
 		goodix,panel-max-p = <4096>;
 		goodix,firmware-name = "goodix_firmware_m20.bin";
 		goodix,config-name = "goodix_cfg_group_m20.bin";
+		goodix,sleep-enable;
 
 		goodix,iovdd-name = "vdd";
 		goodix,avdd-gpio = <&tlmm 107 0x00>;
