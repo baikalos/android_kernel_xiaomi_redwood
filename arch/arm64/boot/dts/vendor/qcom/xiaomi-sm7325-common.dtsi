@@ -136,11 +136,25 @@
 				  <&pmk8350_vadc PM7325_ADC7_AMUX_THM2_100K_PU>,
 				  <&pmk8350_vadc PM7325_ADC7_AMUX_THM3_100K_PU>,
 				  <&pmk8350_vadc PM7325_ADC7_AMUX_THM4_100K_PU>,
+				  <&pmk8350_vadc PM7325_ADC7_AMUX_THM5_100K_PU>,
 				  <&pmk8350_vadc PMK8350_ADC7_AMUX_THM1_100K_PU>,
-				  <&pmk8350_vadc PM7325B_ADC7_GPIO2_100K_PU>;
+				  <&pmk8350_vadc PM7325B_ADC7_GPIO2_100K_PU>,
+				  <&pmk8350_vadc PM7325_ADC7_GPIO3_100K_PU>;
 
 	pm7325b_chg_skin_therm {
 		reg = <PM7325B_ADC7_GPIO2_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+
+	pm7325_pa_4gtherm {
+		reg = <PM7325_ADC7_AMUX_THM5_100K_PU>;
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+	};
+
+	pm7325_pa_5gtherm {
+		reg = <PM7325_ADC7_GPIO3_100K_PU>;
 		qcom,ratiometric;
 		qcom,hw-settle-time = <200>;
 	};
@@ -209,6 +223,22 @@
 		reg = <PM7325B_ADC7_ICHG_FB>;
 		label = "pm7325b_ichg_fb";
 		qcom,pre-scaling = <1000 305185>;
+	};
+
+	pm7325_pa_4gtherm {
+		reg = <PM7325_ADC7_AMUX_THM5_100K_PU>;
+		label = "pm7325_pa_4gtherm";
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		qcom,pre-scaling = <1 1>;
+	};
+
+	pm7325_pa_5gtherm {
+		reg = <PM7325_ADC7_GPIO3_100K_PU>;
+		label = "pm7325_pa_5gtherm";
+		qcom,ratiometric;
+		qcom,hw-settle-time = <200>;
+		qcom,pre-scaling = <1 1>;
 	};
 };
 

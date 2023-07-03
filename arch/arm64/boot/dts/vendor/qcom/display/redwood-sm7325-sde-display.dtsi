@@ -38,7 +38,6 @@
 			qcom,supply-enable-load = <60700>;
 			qcom,supply-disable-load = <80>;
 			qcom,supply-post-on-sleep = <10>;
-			qcom,supply-pre-off-sleep = <1>;
 		};
 
 		qcom,panel-supply-entry@2 {
@@ -49,7 +48,6 @@
 			qcom,supply-enable-load = <10000>;
 			qcom,supply-disable-load = <0>;
 			qcom,supply-post-on-sleep = <10>;
-			qcom,supply-pre-off-sleep = <1>;
 		};
 	};
 
