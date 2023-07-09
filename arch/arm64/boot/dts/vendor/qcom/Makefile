@@ -4,7 +4,6 @@ dtbo-$(CONFIG_ARCH_LAHAINA) += lahaina-rumi-overlay.dtbo \
 	lahaina-mtp-overlay.dtbo \
 	cetus-sm8350-overlay.dtbo \
 	star-sm8350-overlay.dtbo \
-	odin-sm8350-overlay.dtbo \
 	venus-sm8350-overlay.dtbo \
 	haydn-sm8350-overlay.dtbo \
 	mars-sm8350-overlay.dtbo \
@@ -32,7 +31,6 @@ lahaina-rumi-overlay.dtbo-base := lahaina.dtb
 lahaina-mtp-hsp-overlay.dtbo-base := lahaina.dtb
 cetus-sm8350-overlay.dtbo-base := lahaina.dtb
 star-sm8350-overlay.dtbo-base := lahaina.dtb
-odin-sm8350-overlay.dtbo-base := lahaina.dtb
 venus-sm8350-overlay.dtbo-base := lahaina.dtb
 haydn-sm8350-overlay.dtbo-base := lahaina.dtb
 mars-sm8350-overlay.dtbo-base := lahaina.dtb
