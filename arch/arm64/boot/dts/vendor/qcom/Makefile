@@ -240,7 +240,6 @@ dtbo-$(CONFIG_ARCH_YUPIK) +=    \
 	lisa-sm7325-overlay.dtbo \
 	mona-sm7325-overlay.dtbo \
 	taoyao-sm7325-overlay.dtbo \
-	zijin-sm7325-overlay.dtbo \
 	redwood-sm7325-overlay.dtbo \
 	yupik-rumi-overlay.dtbo \
 	yupik-idp-overlay.dtbo \
@@ -278,7 +277,6 @@ dtbo-$(CONFIG_ARCH_YUPIK) +=    \
 lisa-sm7325-overlay.dtbo-base := yupik.dtb
 mona-sm7325-overlay.dtbo-base := yupik.dtb
 taoyao-sm7325-overlay.dtbo-base := yupik.dtb
-zijin-sm7325-overlay.dtbo-base := yupik.dtb
 redwood-sm7325-overlay.dtbo-base := yupik.dtb
 yupik-rumi-overlay.dtbo-base := yupik.dtb
 yupik-idp-overlay.dtbo-base := yupik.dtb
