@@ -74,6 +74,8 @@ static char boost_buf[128];
 const char *board_sensor;
 static char board_sensor_temp[128];
 static char board_sensor_second_temp[128];
+int get_sconfig() { return atomic_read(&switch_mode); }
+EXPORT_SYMBOL_GPL(get_sconfig);
 #endif
 
 /*

@@ -24,8 +24,9 @@
 
 #if defined(CONFIG_BQ_FUEL_GAUGE)
 #include <linux/hwid.h>
-#include <linux/thermal.h>
 #endif
+
+#include <linux/thermal.h>
 
 #include "qti_battery_charger.h"
 #include "qti_typec_class.h"
@@ -54,6 +55,7 @@ static const int battery_prop_map[BATT_PROP_MAX] = {
 	[BATT_TTE_AVG]		= POWER_SUPPLY_PROP_TIME_TO_EMPTY_AVG,
 	[BATT_POWER_NOW]	= POWER_SUPPLY_PROP_POWER_NOW,
 	[BATT_POWER_AVG]	= POWER_SUPPLY_PROP_POWER_AVG,
+	[BATT_INPUT_POWER_LIMIT]	= POWER_SUPPLY_PROP_INPUT_POWER_LIMIT,
 };
 
 static const int usb_prop_map[USB_PROP_MAX] = {
@@ -151,6 +153,7 @@ int battery_chg_write(struct battery_chg_dev *bcdev, void *data,
 		if (!rc) {
 			pr_err("Error, timed out sending message\n");
 			mutex_unlock(&bcdev->rw_lock);
+			return -ETIMEDOUT;
 		}
 
 		rc = 0;
@@ -848,17 +851,24 @@ static u8 get_quick_charge_type(struct battery_chg_dev *bcdev)
 #endif
 
 	if ((batt_health == POWER_SUPPLY_HEALTH_COLD) ||(batt_health == POWER_SUPPLY_HEALTH_WARM)
-	      || (batt_health == POWER_SUPPLY_HEALTH_OVERHEAT) || (batt_health == POWER_SUPPLY_HEALTH_OVERVOLTAGE))
+	      || (batt_health == POWER_SUPPLY_HEALTH_OVERHEAT) || (batt_health == POWER_SUPPLY_HEALTH_OVERVOLTAGE)) {
+        pr_info("get_quick_charge_type: QUICK_CHARGE_NORMAL - unhealthy!!!");
 		return QUICK_CHARGE_NORMAL;
+    }
 
 	if (real_charger_type == POWER_SUPPLY_USB_TYPE_PD_PPS && verify_digiest == 1) {
-		if (apdo_max >= 50)
+		if (apdo_max >= 50) {
+            pr_info("get_quick_charge_type: QUICK_CHARGE_SUPER");
 			return QUICK_CHARGE_SUPER;
-		else
+		} else {
+            pr_info("get_quick_charge_type: QUICK_CHARGE_TURBE");
 			return QUICK_CHARGE_TURBE;
+        }
 	}
-	else if(real_charger_type == POWER_SUPPLY_USB_TYPE_PD_PPS)
+	else if(real_charger_type == POWER_SUPPLY_USB_TYPE_PD_PPS) {
+        pr_info("get_quick_charge_type: QUICK_CHARGE_FAST");
 		return QUICK_CHARGE_FAST;
+    }
 
 #if defined(CONFIG_MI_WIRELESS)
 	switch(tx_adapter)
@@ -882,11 +892,13 @@ static u8 get_quick_charge_type(struct battery_chg_dev *bcdev)
 
 	while (adapter_cap[i].adap_type != 0) {
 		if (real_charger_type == adapter_cap[i].adap_type) {
+            pr_info("get_quick_charge_type: %d", adapter_cap[i].adap_cap);
 			return adapter_cap[i].adap_cap;
 		}
 		i++;
 	}
 
+    pr_info("get_quick_charge_type: QUICK_CHARGE_NORMAL");
 	return QUICK_CHARGE_NORMAL;
 }
 
@@ -895,6 +907,8 @@ static int battery_psy_set_fcc(struct battery_chg_dev *bcdev, u32 prop_id, int v
 	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_BATTERY];
 	u32 temp;
 	int rc;
+
+    pr_info("battery_psy_set_fcc: val=%d", val);
 
 	temp = val;
 	if (val < 0)
@@ -1033,10 +1047,120 @@ static int __battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
 	return rc;
 }
 
-static int battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
+static int _battery_psy_set_charge_current(struct battery_chg_dev *bcdev) {
+
+    int rval = max_t(int, bcdev->curr_baikalos_thermal_level, bcdev->curr_restrict_level);
+
+	int rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_BATTERY],
+				BATT_CHG_CTRL_LIM, rval);
+	if (rc < 0) {
+		pr_err("Failed to set ccl:%d, rc=%d\n", rval, rc);
+		return -EINVAL;
+    }
+    return rc;
+}
+
+
+static int battery_psy_set_charge_current_limit(struct battery_chg_dev *bcdev,
 					int val)
 {
 	int rc;
+	//u32 fcc_ua, prev_fcc_ua;
+
+	if(val == bcdev->curr_restrict_level)
+	      return 0;
+	pr_err("set restrict-level: %d num_thermal_levels: %d \n", val, bcdev->num_thermal_levels);
+
+	if (!bcdev->num_thermal_levels)
+		return 0;
+
+	if (bcdev->num_thermal_levels < 0) {
+		pr_err("Incorrect num_thermal_levels\n");
+		return -EINVAL;
+	}
+
+	if (val < 0 || val > bcdev->num_thermal_levels)
+		return -EINVAL;
+
+    bcdev->curr_restrict_level = val;
+
+    rc = _battery_psy_set_charge_current(bcdev);
+
+	if (rc < 0) {
+		pr_err("Failed to set thermal-level:%d, rc=%d\n", val, rc);
+		return -EINVAL;
+    }
+	//bcdev->curr_thermal_level = val;
+	return rc;
+}
+
+
+static int baikalos_override_thermal_level(struct battery_chg_dev *bcdev, int val) {
+    	struct psy_state *pst = NULL;
+        int rc, pval, batt_temp, sconfig;
+
+                               // 29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46
+        int level_default[] =   {  0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 3, 5, 5, 8,11,11,15 };
+        int level_cool[] =      {  3, 3, 3, 4, 5, 8,10,10,10,10,11,12,13,14,15,15,15,15 };
+        int level_streaming[] = { 10,10,10,10,10,10,10,10,11,11,12,12,13,14,15,15,15,15 };
+        int level_dialer[] =    { 12,12,12,12,12,12,12,12,12,12,12,12,13,14,15,15,15,15 };
+        int level_camera[] =    {  0, 0, 0, 8, 8, 8, 8, 8, 9, 9, 9,15,15,15,15,15,15,15 };
+        int level_browser[] =   {  0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 9, 9, 9,11,11,15 };
+        int level_benchmark[] = {  0, 0, 0, 0, 0, 2, 2, 3, 5, 7, 8, 8, 8,11,15,15,15,15 };
+        int level_gaming[] =    {  0, 0, 0, 0, 0, 5, 5, 5, 7, 7, 8, 9,10,11,12,13,14,15 };
+
+        pval = val;
+
+        sconfig = get_sconfig();
+
+    	pst = &bcdev->psy_list[PSY_TYPE_XM];
+		rc = read_property_id(bcdev, pst, XM_PROP_THERMAL_TEMP);
+        if( rc < 0 ) return val;
+
+		batt_temp = pst->prop[XM_PROP_THERMAL_TEMP];
+        pr_info("thermal batt_temp: %d", batt_temp );
+
+        batt_temp -=  29;
+
+        if( batt_temp < 0 ) { 
+            batt_temp = 0;
+        }
+        if( batt_temp > 17 ) {
+            batt_temp = 17;
+        }
+
+        switch(sconfig) {
+            case 3:
+                pr_info("thermal level_cool: %d", level_cool[batt_temp]);
+                return level_cool[batt_temp];
+            case 4:
+                pr_info("thermal level_streaming: %d", level_streaming[batt_temp]);
+                return level_streaming[batt_temp];
+            case 8:
+                pr_info("thermal level_dialer: %d", level_dialer[batt_temp]);
+                return level_dialer[batt_temp];
+            case 9:
+                pr_info("thermal level_gaming: %d", level_gaming[batt_temp]);
+                return level_gaming[batt_temp];
+            case 10:
+                pr_info("thermal level_benchmark: %d", level_benchmark[batt_temp]);
+                return level_benchmark[batt_temp];
+            case 11:
+                pr_info("thermal level_browser: %d", level_browser[batt_temp]);
+                return level_browser[batt_temp];
+            case 12:
+                pr_info("thermal level_camera: %d", level_camera[batt_temp]);
+                return level_camera[batt_temp];
+            default:
+                pr_info("thermal level_default: %d", level_default[batt_temp]);
+                return level_default[batt_temp];
+        }
+}
+
+static int battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
+					int val)
+{
+	int rc, pval;
 	//u32 fcc_ua, prev_fcc_ua;
 
 	if(val == bcdev->curr_thermal_level)
@@ -1051,28 +1175,21 @@ static int battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
 		return -EINVAL;
 	}
 
-	if (val < 0 || val >= bcdev->num_thermal_levels)
+	if (val < 0 || val > bcdev->num_thermal_levels)
 		return -EINVAL;
 
-	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_BATTERY],
-				BATT_CHG_CTRL_LIM, val);
-	if (rc < 0)
-		pr_err("Failed to set ccl:%d, rc=%d\n", val, rc);
+    bcdev->curr_thermal_level = val;
 
-	bcdev->curr_thermal_level = val;
+    pval = baikalos_override_thermal_level(bcdev, val);
+    
+    bcdev->curr_baikalos_thermal_level = pval;
 
-#if 0
-	fcc_ua = bcdev->thermal_levels[val];
-	prev_fcc_ua = bcdev->thermal_fcc_ua;
-	bcdev->thermal_fcc_ua = fcc_ua;
+    rc = _battery_psy_set_charge_current(bcdev);
 
-	rc = __battery_psy_set_charge_current(bcdev, fcc_ua);
-	if (!rc)
-		bcdev->curr_thermal_level = val;
-	else
-		bcdev->thermal_fcc_ua = prev_fcc_ua;
-#endif
-
+	if (rc < 0) {
+		pr_err("Failed to set thermal-level:%d, rc=%d\n", pval, rc);
+		return -EINVAL;
+    }
 	return rc;
 }
 
@@ -1129,6 +1246,12 @@ static int battery_psy_get_prop(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT_MAX:
 		pval->intval = bcdev->num_thermal_levels;
 		break;
+    case POWER_SUPPLY_PROP_INPUT_POWER_LIMIT:
+		pval->intval = bcdev->curr_restrict_level;
+        break;
+	case POWER_SUPPLY_PROP_TIME_TO_FULL_AVG:
+		pval->intval = (pst->prop[prop_id] * 30) >= 65535 ? 65535 : (pst->prop[prop_id] * 30);
+		break;
 #ifndef CONFIG_BQ_FUEL_GAUGE
         case POWER_SUPPLY_PROP_CHARGE_COUNTER:
                 pval->intval = DIV_ROUND_CLOSEST(pst->prop[prop_id], 100);
@@ -1157,6 +1280,10 @@ static int battery_psy_set_prop(struct power_supply *psy,
 	switch (prop) {
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:
 		return battery_psy_set_charge_current(bcdev, pval->intval);
+
+	case POWER_SUPPLY_PROP_INPUT_POWER_LIMIT:
+		return battery_psy_set_charge_current_limit(bcdev, pval->intval);
+
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
 		rc = battery_psy_set_fcc(bcdev, prop_id, pval->intval);
 		break;
@@ -1173,6 +1300,7 @@ static int battery_psy_prop_is_writeable(struct power_supply *psy,
 	switch (prop) {
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
+    case POWER_SUPPLY_PROP_INPUT_POWER_LIMIT:
 		return 1;
 	default:
 		break;
@@ -1206,6 +1334,7 @@ static enum power_supply_property battery_props[] = {
 	POWER_SUPPLY_PROP_TIME_TO_EMPTY_AVG,
 	POWER_SUPPLY_PROP_POWER_NOW,
 	POWER_SUPPLY_PROP_POWER_AVG,
+	POWER_SUPPLY_PROP_INPUT_POWER_LIMIT,
 };
 
 static const struct power_supply_desc batt_psy_desc = {
@@ -1222,6 +1351,7 @@ static const struct power_supply_desc batt_psy_desc = {
 };
 
 #if defined(CONFIG_BQ_FUEL_GAUGE)
+static int prev_batt_temp = 0;
 static int power_supply_read_temp(struct thermal_zone_device *tzd,
 		int *temp)
 {
@@ -1251,9 +1381,15 @@ static int power_supply_read_temp(struct thermal_zone_device *tzd,
 	}
 
 	*temp = batt_temp * 1000;
-	pr_err("batt_thermal temp:%d ,delta:%ld blank_state=%d chg_type=%s tl:=%d  ffc:=%d, pd_verifed:=%d\n",
+	pr_err("batt_thermal temp=%d delta=%ld blank_state=%d chg_type=%s tl=%d btl=%d ffc=%d pd_verifed=%d apdo_max=%d\n",
 		batt_temp,delta, bcdev->blank_state, power_supply_usb_type_text[pst->prop[XM_PROP_REAL_TYPE]],
-		bcdev->curr_thermal_level, pst->prop[XM_PROP_FASTCHGMODE], pst->prop[XM_PROP_PD_VERIFED]);
+		bcdev->curr_thermal_level, bcdev->curr_baikalos_thermal_level, pst->prop[XM_PROP_FASTCHGMODE], pst->prop[XM_PROP_PD_VERIFED], pst->prop[XM_PROP_APDO_MAX]);
+
+    if( prev_batt_temp != batt_temp ) {
+        prev_batt_temp = batt_temp;
+        battery_psy_set_charge_current_limit(bcdev,bcdev->curr_thermal_level);
+    }
+
 	return 0;
 }
 
@@ -2066,7 +2202,8 @@ static int fb_notifier_callback(struct notifier_block *nb,
 			blank == MI_DISP_DPMS_LP1 || blank == MI_DISP_DPMS_LP2)) {
 			bcdev->blank_state = FB_BLANK;
 		} else if (blank == MI_DISP_DPMS_ON) {
-			bcdev->blank_state = FB_UNBLANK;
+			//bcdev->blank_state = FB_UNBLANK;
+            bcdev->blank_state = FB_BLANK;
 		}
 
 		rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_XM],
@@ -2259,6 +2396,10 @@ static int battery_chg_probe(struct platform_device *pdev)
 			return PTR_ERR(bcdev->typec_class);
 		}
 	}
+
+	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_XM],
+				XM_PROP_FB_BLANK_STATE, 1);
+
 
 	schedule_work(&bcdev->usb_type_work);
 
