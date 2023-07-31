@@ -60,9 +60,12 @@
 *
 ********************************************************/
 #define INPUT_DEV
+#define DEBUG
+/* #define TEST_RTP */
 #define AW_RAM_UPDATE_DELAY
+#define ENABLE_PIN_CONTROL
 #define AW_CHECK_RAM_DATA
-
+#define AW_CHECK_QUAL
 /*********************************************************
 *
 * enum
@@ -168,9 +171,12 @@ struct awinic {
 
 	struct aw8697 *aw8697;
 	struct aw86927 *aw86927;
+#ifdef ENABLE_PIN_CONTROL
 	struct pinctrl *awinic_pinctrl;
 	struct pinctrl_state *pinctrl_state[3];
+#endif
 };
+
 
 struct ram {
 	unsigned char version;
@@ -201,6 +207,7 @@ struct haptic_audio {
 	struct haptic_ctr ctr;
 	unsigned char ori_gain;
 };
+
 
 /*********************************************************
 *
