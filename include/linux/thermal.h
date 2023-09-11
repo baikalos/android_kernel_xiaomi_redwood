@@ -447,11 +447,13 @@ void thermal_zone_device_update(struct thermal_zone_device *,
 #ifdef CONFIG_QTI_THERMAL
 void thermal_zone_device_update_temp(struct thermal_zone_device *tz,
 				enum thermal_notify_event event, int temp);
+int get_sconfig(void);
 #else
 static inline void thermal_zone_device_update_temp(
 		struct thermal_zone_device *tz, enum thermal_notify_event event,
 		int temp)
 { }
+static inline int get_sconfig(void) { return 0; }
 #endif
 void thermal_zone_set_trips(struct thermal_zone_device *);
 
