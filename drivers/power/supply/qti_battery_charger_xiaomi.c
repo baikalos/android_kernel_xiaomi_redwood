@@ -2919,6 +2919,93 @@ static ssize_t adsp_result_show(struct class *c,
 static CLASS_ATTR_RO(adsp_result);
 #endif
 
+static ssize_t shipmode_count_reset_store(struct class *c,
+					struct class_attribute *attr,
+					const char *buf, size_t count)
+{
+	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
+						battery_class);
+	int rc;
+	int val;
+
+	if (kstrtoint(buf, 10, &val))
+		return -EINVAL;
+
+	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_XM],
+				XM_PROP_SHIPMODE_COUNT_RESET, val);
+	if (rc < 0)
+		return rc;
+
+	return count;
+}
+
+static ssize_t shipmode_count_reset_show(struct class *c,
+					struct class_attribute *attr, char *buf)
+{
+	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
+						battery_class);
+	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_XM];
+	int rc;
+
+	rc = read_property_id(bcdev, pst, XM_PROP_SHIPMODE_COUNT_RESET);
+	if (rc < 0)
+		return rc;
+
+	return scnprintf(buf, PAGE_SIZE, "%u\n", pst->prop[XM_PROP_SHIPMODE_COUNT_RESET]);
+}
+static CLASS_ATTR_RW(shipmode_count_reset);
+
+static ssize_t sport_mode_store(struct class *c,
+					struct class_attribute *attr,
+					const char *buf, size_t count)
+{
+	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
+						battery_class);
+	int rc;
+	int val;
+
+	if (kstrtoint(buf, 10, &val))
+		return -EINVAL;
+
+	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_XM],
+				XM_PROP_SPORT_MODE, val);
+	if (rc < 0)
+		return rc;
+
+	return count;
+}
+
+static ssize_t sport_mode_show(struct class *c,
+					struct class_attribute *attr, char *buf)
+{
+	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
+						battery_class);
+	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_XM];
+	int rc;
+
+	rc = read_property_id(bcdev, pst, XM_PROP_SPORT_MODE);
+	if (rc < 0)
+		return rc;
+
+	return scnprintf(buf, PAGE_SIZE, "%u\n", pst->prop[XM_PROP_SPORT_MODE]);
+}
+static CLASS_ATTR_RW(sport_mode);
+
+static ssize_t fg_vendor_show(struct class *c,
+					struct class_attribute *attr, char *buf)
+{
+	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
+						battery_class);
+	struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_XM];
+	int rc;
+
+	rc = read_property_id(bcdev, pst, XM_PROP_FG_VENDOR_ID);
+	if (rc < 0)
+		return rc;
+
+	return scnprintf(buf, PAGE_SIZE, "%d\n", pst->prop[XM_PROP_FG_VENDOR_ID]);
+}
+static CLASS_ATTR_RO(fg_vendor);
 static struct attribute *xiaomi_battery_class_attrs[] = {
 	&class_attr_wireless_register.attr,
 	&class_attr_wireless_input_curr.attr,
@@ -3040,7 +3127,10 @@ static struct attribute *xiaomi_battery_class_attrs[] = {
 	&class_attr_server_result.attr,
 	&class_attr_adsp_result.attr,
 #endif
+	&class_attr_shipmode_count_reset.attr,
+	&class_attr_sport_mode.attr,
 	&class_attr_power_max.attr,
+	&class_attr_fg_vendor.attr,
 	NULL,
 };
 
