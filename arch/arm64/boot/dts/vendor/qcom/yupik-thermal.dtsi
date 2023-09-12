@@ -272,13 +272,13 @@
 		trips {
 			cpu00_config: cpu00-config {
 				temperature = <110000>;
-				hysteresis = <10000>;
+				hysteresis = <3000>;
 				type = "passive";
 			};
 
 			cpu00_config1: cpu00-config1 {
 				temperature = <112000>;
-				hysteresis = <12000>;
+				hysteresis = <5000>;
 				type = "passive";
 			};
 		};
