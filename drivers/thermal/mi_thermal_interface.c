@@ -87,7 +87,7 @@ static int screen_state_for_thermal_callback(struct notifier_block *nb,
 	blank = *(int *)(evdata->data);
 	switch (blank) {
 	case MI_DISP_DPMS_ON:
-		sm.screen_state = 1;
+		sm.screen_state = 0;
 		break;
 	case MI_DISP_DPMS_LP1:
 	case MI_DISP_DPMS_LP2:
