@@ -176,7 +176,7 @@ int write_property_id(struct battery_chg_dev *bcdev,
 	req_msg.hdr.opcode = pst->opcode_set;
 
 	if (pst->psy)
-		pr_debug("psy: %s prop_id: %u val: %u\n", pst->psy->desc->name,
+		pr_info("psy: %s prop_id: %u val: %u\n", pst->psy->desc->name,
 			req_msg.property_id, val);
 
 	return battery_chg_write(bcdev, &req_msg, sizeof(req_msg));
@@ -557,7 +557,7 @@ static void battery_chg_update_usb_type_work(struct work_struct *work)
 	    pst->prop[USB_ADAP_TYPE] != POWER_SUPPLY_USB_TYPE_PD)
 		bcdev->usb_icl_ua = 0;
 
-	pr_debug("usb_adap_type: %u\n", pst->prop[USB_ADAP_TYPE]);
+	pr_info("usb_adap_type: %u\n", pst->prop[USB_ADAP_TYPE]);
 
 	switch (pst->prop[USB_ADAP_TYPE]) {
 	case POWER_SUPPLY_USB_TYPE_SDP:
@@ -965,6 +965,7 @@ static int usb_psy_set_prop(struct power_supply *psy,
 
 	switch (prop) {
 	case POWER_SUPPLY_PROP_INPUT_CURRENT_LIMIT:
+        pr_debug("usb_psy_set_prop: set ICL=%d", pval->intval);
 		rc = usb_psy_set_icl(bcdev, prop_id, pval->intval);
 		break;
 	default:
@@ -1118,7 +1119,7 @@ static int baikalos_override_thermal_level(struct battery_chg_dev *bcdev, int va
         if( rc < 0 ) return val;
 
 		batt_temp = pst->prop[XM_PROP_THERMAL_TEMP];
-        pr_info("thermal batt_temp: %d", batt_temp );
+        pr_debug("thermal batt_temp: %d", batt_temp );
 
         batt_temp -=  29;
 
@@ -1279,12 +1280,15 @@ static int battery_psy_set_prop(struct power_supply *psy,
 
 	switch (prop) {
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:
+        pr_debug("POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:%d",pval->intval);
 		return battery_psy_set_charge_current(bcdev, pval->intval);
 
 	case POWER_SUPPLY_PROP_INPUT_POWER_LIMIT:
+        pr_debug("POWER_SUPPLY_PROP_INPUT_POWER_LIMIT:%d",pval->intval);
 		return battery_psy_set_charge_current_limit(bcdev, pval->intval);
 
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
+        pr_debug("POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:%d",pval->intval);
 		rc = battery_psy_set_fcc(bcdev, prop_id, pval->intval);
 		break;
 	default:
@@ -1385,7 +1389,7 @@ static int power_supply_read_temp(struct thermal_zone_device *tzd,
 		batt_temp,delta, bcdev->blank_state, power_supply_usb_type_text[pst->prop[XM_PROP_REAL_TYPE]],
 		bcdev->curr_thermal_level, bcdev->curr_baikalos_thermal_level, pst->prop[XM_PROP_FASTCHGMODE], pst->prop[XM_PROP_PD_VERIFED], pst->prop[XM_PROP_APDO_MAX]);
 
-    if( prev_batt_temp != batt_temp ) {
+    if( prev_batt_temp != batt_temp || delta > 5000 ) {
         prev_batt_temp = batt_temp;
         battery_psy_set_charge_current_limit(bcdev,bcdev->curr_thermal_level);
     }
@@ -1460,6 +1464,9 @@ static void battery_chg_subsys_up_work(struct work_struct *work)
 		if (rc < 0)
 			pr_err("Failed to set FCC (%u uA), rc=%d\n",
 				bcdev->last_fcc_ua, rc);
+        else 
+            pr_debug("last_fcc_ua: set FCCUA=%d", bcdev->last_fcc_ua);
+
 	}
 
 	if (bcdev->usb_icl_ua) {
@@ -1468,6 +1475,8 @@ static void battery_chg_subsys_up_work(struct work_struct *work)
 		if (rc < 0)
 			pr_err("Failed to set ICL(%u uA), rc=%d\n",
 				bcdev->usb_icl_ua, rc);
+        else 
+            pr_debug("usb_icl_ua: set ICL=%d", bcdev->usb_icl_ua);
 	}
 }
 
@@ -1625,7 +1634,7 @@ static int wireless_fw_update(struct battery_chg_dev *bcdev, bool force)
 		rc = 0;
 	}
 
-	pr_info("Wireless FW update done\n");
+	pr_debug("Wireless FW update done\n");
 
 release_fw:
 	bcdev->wls_fw_crc = 0;
@@ -2198,6 +2207,7 @@ static int fb_notifier_callback(struct notifier_block *nb,
 		blank = *(int *)(evdata->data);
 		pr_debug("val:%lu,blank:%u\n", val, blank);
 
+        /*
 		if ((blank == MI_DISP_DPMS_POWERDOWN ||
 			blank == MI_DISP_DPMS_LP1 || blank == MI_DISP_DPMS_LP2)) {
 			bcdev->blank_state = FB_BLANK;
@@ -2205,7 +2215,9 @@ static int fb_notifier_callback(struct notifier_block *nb,
 			//bcdev->blank_state = FB_UNBLANK;
             bcdev->blank_state = FB_BLANK;
 		}
+        */
 
+        bcdev->blank_state = FB_BLANK;
 		rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_XM],
 				XM_PROP_FB_BLANK_STATE, bcdev->blank_state);
 		if (rc < 0)
@@ -2397,8 +2409,10 @@ static int battery_chg_probe(struct platform_device *pdev)
 		}
 	}
 
+    bcdev->blank_state = FB_BLANK;
+
 	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_XM],
-				XM_PROP_FB_BLANK_STATE, 1);
+				XM_PROP_FB_BLANK_STATE, bcdev->blank_state);
 
 
 	schedule_work(&bcdev->usb_type_work);
