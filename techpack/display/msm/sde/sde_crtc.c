@@ -276,6 +276,8 @@ static ssize_t fps_periodicity_ms_show(struct device *device,
 		(sde_crtc->fps_info.fps_periodic_duration)/MILI_TO_MICRO);
 }
 
+extern unsigned int cur_refresh_rate;
+
 static ssize_t measured_fps_show(struct device *device,
 		struct device_attribute *attr, char *buf)
 {
@@ -366,7 +368,7 @@ static ssize_t measured_fps_show(struct device *device,
 
     baikal_fps = fps_decimal > 4 ? fps_int+1 : fps_int;
 
-	return scnprintf(buf, PAGE_SIZE, "fps: %d\n", baikal_fps);
+	return scnprintf(buf, PAGE_SIZE, "fps: %d:%d\n", baikal_fps, cur_refresh_rate);
 
 }
 
