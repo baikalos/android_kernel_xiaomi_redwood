@@ -610,8 +610,8 @@ int __init blk_crypto_fallback_init(void)
 		return -ENOMEM;
 
 	blk_crypto_wq = alloc_workqueue("blk_crypto_wq",
-					WQ_UNBOUND | WQ_HIGHPRI |
-					WQ_MEM_RECLAIM, num_online_cpus());
+					WQ_HIGHPRI |
+					WQ_MEM_RECLAIM, /*num_online_cpus()*/ 0);
 	if (!blk_crypto_wq)
 		return -ENOMEM;
 

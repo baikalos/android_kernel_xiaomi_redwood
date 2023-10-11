@@ -1441,7 +1441,23 @@ static void __queue_work(int cpu, struct workqueue_struct *wq,
 	if (unlikely(wq->flags & __WQ_DRAINING) &&
 	    WARN_ON_ONCE(!is_chained_work(wq)))
 		return;
-	rcu_read_lock();
+		
+	/*if (req_cpu == WORK_CPU_UNBOUND)
+		cpu = wq_select_unbound_cpu(0);*/
+
+    rcu_read_lock();
+
+    if (req_cpu == WORK_CPU_UNBOUND) {
+	    if (wq->flags & WQ_UNBOUND) {
+            cpu = wq_select_unbound_cpu(0);
+		    pwq = unbound_pwq_by_node(wq, cpu_to_node(cpu));
+	    } else {
+			cpu = 0;
+    		pwq = per_cpu_ptr(wq->cpu_pwqs, cpu);
+        }
+        goto firsttry;
+	}
+	
 retry:
 	/* pwq which will be used unless @work is executing elsewhere */
 	if (wq->flags & WQ_UNBOUND) {
@@ -1454,6 +1470,7 @@ retry:
 		pwq = per_cpu_ptr(wq->cpu_pwqs, cpu);
 	}
 
+firsttry:
 	/*
 	 * If @work was previously on a different pool, it might still be
 	 * running there, in which case the work needs to be queued on that
@@ -1678,7 +1695,7 @@ static void __queue_delayed_work(int cpu, struct workqueue_struct *wq,
 	if (unlikely(cpu != WORK_CPU_UNBOUND))
 		add_timer_on(timer, cpu);
 	else
-		add_timer(timer);
+		add_timer_on(timer, 0);
 }
 
 /**
@@ -3381,6 +3398,7 @@ void free_workqueue_attrs(struct workqueue_attrs *attrs)
 struct workqueue_attrs *alloc_workqueue_attrs(void)
 {
 	struct workqueue_attrs *attrs;
+	const unsigned long allowed_cpus = 0x0f;
 
 	attrs = kzalloc(sizeof(*attrs), GFP_KERNEL);
 	if (!attrs)
@@ -3388,7 +3406,7 @@ struct workqueue_attrs *alloc_workqueue_attrs(void)
 	if (!alloc_cpumask_var(&attrs->cpumask, GFP_KERNEL))
 		goto fail;
 
-	cpumask_copy(attrs->cpumask, cpu_possible_mask);
+	cpumask_copy(attrs->cpumask, to_cpumask(&allowed_cpus));
 	return attrs;
 fail:
 	free_workqueue_attrs(attrs);
@@ -5994,12 +6012,12 @@ int __init workqueue_init_early(void)
 	}
 
 	system_wq = alloc_workqueue("events", 0, 0);
-	system_highpri_wq = alloc_workqueue("events_highpri", WQ_HIGHPRI, 0);
-	system_long_wq = alloc_workqueue("events_long", 0, 0);
+	system_highpri_wq = alloc_workqueue("events_highpri", WQ_HIGHPRI | WQ_POWER_EFFICIENT, 0);
+	system_long_wq = alloc_workqueue("events_long", WQ_POWER_EFFICIENT, 0);
 	system_unbound_wq = alloc_workqueue("events_unbound", WQ_UNBOUND,
 					    WQ_UNBOUND_MAX_ACTIVE);
 	system_freezable_wq = alloc_workqueue("events_freezable",
-					      WQ_FREEZABLE, 0);
+					      WQ_FREEZABLE | WQ_POWER_EFFICIENT, 0);
 	system_power_efficient_wq = alloc_workqueue("events_power_efficient",
 					      WQ_POWER_EFFICIENT, 0);
 	system_freezable_power_efficient_wq = alloc_workqueue("events_freezable_power_efficient",

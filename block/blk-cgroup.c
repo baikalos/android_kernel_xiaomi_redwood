@@ -1867,8 +1867,7 @@ void blkcg_add_delay(struct blkcg_gq *blkg, u64 now, u64 delta)
 static int __init blkcg_init(void)
 {
 	blkcg_punt_bio_wq = alloc_workqueue("blkcg_punt_bio",
-					    WQ_MEM_RECLAIM | WQ_FREEZABLE |
-					    WQ_UNBOUND | WQ_SYSFS, 0);
+					    WQ_MEM_RECLAIM | WQ_FREEZABLE | WQ_SYSFS, 0);
 	if (!blkcg_punt_bio_wq)
 		return -ENOMEM;
 	return 0;
