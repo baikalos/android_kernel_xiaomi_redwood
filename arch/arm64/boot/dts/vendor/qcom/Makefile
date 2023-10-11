@@ -223,9 +223,33 @@ endif
 
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 dtbo-$(CONFIG_ARCH_YUPIK) +=    \
-	redwood-sm7325-overlay.dtbo
-
+	redwood-sm7325-overlay.dtbo \
+	yupik-rumi-overlay.dtbo \
+	yupik-idp-overlay.dtbo \
+	yupik-atp-overlay.dtbo \
+	yupik-qrd-overlay.dtbo \
+	yupik-idps-amoled-overlay.dtbo \
+	yupik-idp-pm7250b-overlay.dtbo \
+	yupik-idp-hsp-overlay.dtbo \
+	yupik-iot-idp-overlay.dtbo \
+	yupik-iot-idp-pm7250b-overlay.dtbo \
+	yupik-iot-qrd-overlay.dtbo \
+	yupik-iot-hsp-overlay.dtbo \
+	yupik-iot-hsp-pm7250b-overlay.dtbo \
+	yupik-iot-idps-amoled-overlay.dtbo
 redwood-sm7325-overlay.dtbo-base := yupik.dtb
+yupik-rumi-overlay.dtbo-base := yupik.dtb
+yupik-idp-overlay.dtbo-base := yupik.dtb
+yupik-atp-overlay.dtbo-base := yupik.dtb
+yupik-qrd-overlay.dtbo-base := yupik.dtb
+yupik-idps-amoled-overlay.dtbo-base := yupik.dtb
+yupik-idp-pm7250b-overlay.dtbo-base := yupik.dtb
+yupik-idp-hsp-overlay.dtbo-base := yupik-hsp.dtb
+yupik-iot-idp-overlay.dtbo-base := yupik-iot.dtb katmai.dtb katmai-fp2.dtb
+yupik-iot-idp-pm7250b-overlay.dtbo-base := yupik-iot.dtb katmai.dtb katmai-fp2.dtb
+yupik-iot-qrd-overlay.dtbo-base := yupik-iot.dtb katmai.dtb katmai-fp2.dtb
+yupik-iot-hsp-overlay.dtbo-base := yupik-iot.dtb
+yupik-iot-hsp-pm7250b-overlay.dtbo-base := yupik-iot.dtb
 else
 dtb-$(CONFIG_ARCH_YUPIK) += yupik-rumi.dtb \
 	yupik-idp.dtb \
