@@ -368,7 +368,7 @@ static ssize_t measured_fps_show(struct device *device,
 
     baikal_fps = fps_decimal > 4 ? fps_int+1 : fps_int;
 
-	return scnprintf(buf, PAGE_SIZE, "fps: %d:%d\n", baikal_fps, cur_refresh_rate);
+	return scnprintf(buf, PAGE_SIZE, "fps: %d,%d\n", baikal_fps, cur_refresh_rate);
 
 }
 
