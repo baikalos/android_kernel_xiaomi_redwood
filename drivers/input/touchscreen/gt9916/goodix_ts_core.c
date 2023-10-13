@@ -1494,7 +1494,8 @@ static irqreturn_t goodix_ts_threadirq_func(int irq, void *data)
 #ifdef CONFIG_TOUCH_BOOST
 	touch_irq_boost();
 #endif
-	pm_stay_awake(core_data->bus->dev);
+	//pm_stay_awake(core_data->bus->dev);
+    pm_wakeup_event(core_data->bus->dev,1000);
 #ifdef CONFIG_PM
 	if (core_data->tp_pm_suspend) {
 		ts_info("device in suspend, wait to resume");
@@ -1548,7 +1549,7 @@ static irqreturn_t goodix_ts_threadirq_func(int irq, void *data)
 #ifdef CONFIG_TOUCH_BOOST
 	lpm_disable_for_dev(false, EVENT_INPUT);
 #endif
-	pm_relax(core_data->bus->dev);
+	//pm_relax(core_data->bus->dev);
 
 	return IRQ_HANDLED;
 }
