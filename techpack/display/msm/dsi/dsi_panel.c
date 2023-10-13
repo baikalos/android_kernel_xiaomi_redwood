@@ -5067,7 +5067,7 @@ int dsi_panel_gamma_switch(struct dsi_panel *panel)
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_FPS_120_GAMMA);
 	} else if (panel->cur_mode->timing.refresh_rate == 90) {
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_FPS_90_GAMMA);
-	} else if (panel->cur_mode->timing.refresh_rate == 60){
+	} else if (panel->cur_mode->timing.refresh_rate <= 60){
 		rc = dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_FPS_60_GAMMA);
 	}
 
