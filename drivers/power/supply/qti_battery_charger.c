@@ -1385,11 +1385,13 @@ static int power_supply_read_temp(struct thermal_zone_device *tzd,
 	}
 
 	*temp = batt_temp * 1000;
-	pr_err("batt_thermal temp=%d delta=%ld blank_state=%d chg_type=%s tl=%d btl=%d ffc=%d pd_verifed=%d apdo_max=%d\n",
-		batt_temp,delta, bcdev->blank_state, power_supply_usb_type_text[pst->prop[XM_PROP_REAL_TYPE]],
-		bcdev->curr_thermal_level, bcdev->curr_baikalos_thermal_level, pst->prop[XM_PROP_FASTCHGMODE], pst->prop[XM_PROP_PD_VERIFED], pst->prop[XM_PROP_APDO_MAX]);
 
-    if( prev_batt_temp != batt_temp || delta > 5000 ) {
+    if( prev_batt_temp != batt_temp || delta > 10000 ) {
+
+    	pr_info("batt_thermal temp=%d delta=%ld blank_state=%d chg_type=%s tl=%d btl=%d ffc=%d pd_verifed=%d apdo_max=%d\n",
+	    	batt_temp,delta, bcdev->blank_state, power_supply_usb_type_text[pst->prop[XM_PROP_REAL_TYPE]],
+		    bcdev->curr_thermal_level, bcdev->curr_baikalos_thermal_level, pst->prop[XM_PROP_FASTCHGMODE], pst->prop[XM_PROP_PD_VERIFED], pst->prop[XM_PROP_APDO_MAX]);
+
         prev_batt_temp = batt_temp;
         battery_psy_set_charge_current_limit(bcdev,bcdev->curr_thermal_level);
     }
@@ -2468,7 +2470,7 @@ static int chg_suspend(struct device *dev)
 {
 	//struct battery_chg_dev *bcdev = dev_get_drvdata(dev);
 
-	pr_err("chg suspend\n");
+	//pr_err("chg suspend\n");
 	return 0;
 }
 
@@ -2476,7 +2478,7 @@ static int chg_resume(struct device *dev)
 {
 	//struct battery_chg_dev *bcdev = dev_get_drvdata(dev);
 
-	pr_err("chg resume\n");
+	//pr_err("chg resume\n");
 	return 0;
 }
 static const struct of_device_id battery_chg_match_table[] = {
