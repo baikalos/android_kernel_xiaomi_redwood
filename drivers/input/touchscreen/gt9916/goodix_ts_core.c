@@ -1428,20 +1428,20 @@ finger_pos:
 		input_report_key(dev, BTN_TOUCH, 1);
 		ts_info("BTN_TOUCH DOWN, touch num: %d", touch_num);
 		input_report_key(dev, BTN_TOOL_FINGER, 1);
-		if (global_spi_parent_device != NULL) {
+		/*if (global_spi_parent_device != NULL) {
 			pm_runtime_set_autosuspend_delay(global_spi_parent_device, 250);
 			pm_runtime_use_autosuspend(global_spi_parent_device);
 			pm_runtime_enable(global_spi_parent_device);
-		}
+		}*/
 	} else if (!touch_num && pre_finger_num) {
 		input_report_key(dev, BTN_TOUCH, 0);
 		ts_info("BTN_TOUCH UP, touch num: %d", touch_num);
 		input_report_key(dev, BTN_TOOL_FINGER, 0);
-		if (global_spi_parent_device != NULL) {
+		/*if (global_spi_parent_device != NULL) {
 			pm_runtime_set_autosuspend_delay(global_spi_parent_device, 50);
 			pm_runtime_use_autosuspend(global_spi_parent_device);
 			pm_runtime_enable(global_spi_parent_device);
-		}
+		}*/
 	}
 	pre_finger_num = touch_num;
 
@@ -1495,7 +1495,7 @@ static irqreturn_t goodix_ts_threadirq_func(int irq, void *data)
 	touch_irq_boost();
 #endif
 	//pm_stay_awake(core_data->bus->dev);
-    pm_wakeup_event(core_data->bus->dev,1000);
+    pm_wakeup_event(core_data->bus->dev,500);
 #ifdef CONFIG_PM
 	if (core_data->tp_pm_suspend) {
 		ts_info("device in suspend, wait to resume");
@@ -2321,7 +2321,7 @@ static int goodix_ts_pm_suspend(struct device *dev)
 
 	ts_info("%s enter", __func__);
 
-	if (device_may_wakeup(dev) && core_data->gesture_enabled) {
+	if (device_may_wakeup(dev) /*&& core_data->gesture_enabled*/) {
 		enable_irq_wake(core_data->irq);
 	}
 	core_data->tp_pm_suspend = true;
@@ -2338,7 +2338,7 @@ static int goodix_ts_pm_resume(struct device *dev)
 		dev_get_drvdata(dev);
 	ts_info("%s enter.", __func__);
 
-	if (device_may_wakeup(dev) && core_data->gesture_enabled) {
+	if (device_may_wakeup(dev) /*&& core_data->gesture_enabled*/) {
 		disable_irq_wake(core_data->irq);
 	}
 	core_data->tp_pm_suspend = false;
