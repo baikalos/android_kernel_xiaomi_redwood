@@ -58,7 +58,7 @@
 		} while (0)
 #endif
 
-#if defined(WLAN_DEBUG) || defined(DEBUG) || defined(QDF_TRACE_PRINT_ENABLE)
+#if defined(QDF_TRACE_PRINT_ENABLE)  //defined(WLAN_DEBUG) || defined(DEBUG) || defined(QDF_TRACE_PRINT_ENABLE)
 #define QDF_TRACE qdf_trace_msg
 #define QDF_VTRACE qdf_vtrace_msg
 #define QDF_TRACE_HEX_DUMP qdf_trace_hex_dump
@@ -68,7 +68,7 @@
 #define QDF_TRACE_HEX_DUMP(arg ...) __qdf_trace_hexdump_dummy(arg)
 #endif
 
-#if defined(WLAN_DEBUG) || defined(DEBUG) || defined(QDF_TRACE_PRINT_ENABLE)
+#if /*defined(WLAN_DEBUG) || defined(DEBUG) ||*/ defined(QDF_TRACE_PRINT_ENABLE)
 #define QDF_MAX_LOGS_PER_SEC 2
 /**
  * __QDF_TRACE_RATE_LIMITED() - rate limited version of QDF_TRACE

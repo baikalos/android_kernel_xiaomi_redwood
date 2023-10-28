@@ -318,7 +318,7 @@ static int awinic_select_pin_ctl(struct awinic *awinic, const char *name)
 	}
 
 	rc = -EINVAL;
-	aw_info("%s: '%s' not found\n", __func__, name);
+	aw_dbg("%s: '%s' not found\n", __func__, name);
 
 exit:
 	return rc;
@@ -372,10 +372,10 @@ static int awinic_hw_reset(struct awinic *awinic)
 	if (!awinic->enable_pin_control) {
 		if (awinic && gpio_is_valid(awinic->reset_gpio)) {
 			gpio_set_value_cansleep(awinic->reset_gpio, 0);
-			aw_info("%s pull down1\n", __func__);
+			aw_dbg("%s pull down1\n", __func__);
 			usleep_range(5000, 5500);
 			gpio_set_value_cansleep(awinic->reset_gpio, 1);
-			aw_info("%s pull up1\n", __func__);
+			aw_dbg("%s pull up1\n", __func__);
 			usleep_range(8000, 8500);
 		} else
 			aw_err("%s:  failed\n", __func__);
@@ -443,17 +443,17 @@ static int awinic_parse_chipid(struct awinic *awinic)
 		}
 
 		if (reg_val == AW8697_CHIP_ID) {
-			aw_info("%s aw8697 detected\n", __func__);
+			aw_dbg("%s aw8697 detected\n", __func__);
 			awinic->name = AW8697;
 			awinic_sw_reset(awinic);
 			return 0;
 		} else if (reg_val == AW86927_CHIP_ID) {
-			aw_info("%s aw86927 detected\n", __func__);
+			aw_dbg("%s aw86927 detected\n", __func__);
 			awinic->name = AW86927;
 			awinic_sw_reset(awinic);
 			return 0;
 		} else {
-			aw_info("%s unsupported device revision (0x%x)\n",
+			aw_dbg("%s unsupported device revision (0x%x)\n",
 				__func__, reg_val);
 			break;
 		}
@@ -476,7 +476,7 @@ static int awinic_parse_dt(struct awinic *awinic, struct device *dev,
 {
 	awinic->reset_gpio = of_get_named_gpio(np, "reset-gpio", 0);
 	if (awinic->reset_gpio >= 0)
-		aw_info("%s: reset gpio provided ok\n", __func__);
+		aw_dbg("%s: reset gpio provided ok\n", __func__);
 	else {
 		awinic->reset_gpio = -1;
 		aw_err("%s: no reset gpio provided, will not HW reset device\n",
@@ -489,7 +489,7 @@ static int awinic_parse_dt(struct awinic *awinic, struct device *dev,
 		aw_err("%s: no irq gpio provided.\n", __func__);
 		awinic->IsUsedIRQ = false;
 	} else {
-		aw_info("%s: irq gpio provided ok.\n", __func__);
+		aw_dbg("%s: irq gpio provided ok.\n", __func__);
 		awinic->IsUsedIRQ = true;
 	}
 
@@ -551,11 +551,11 @@ static int awinic_i2c_probe(struct i2c_client *i2c,
 	awinic->awinic_pinctrl = devm_pinctrl_get(&i2c->dev);
 	if (IS_ERR(awinic->awinic_pinctrl)) {
 		if (PTR_ERR(awinic->awinic_pinctrl) == -EPROBE_DEFER) {
-			aw_info("%s pinctrl not ready\n", __func__);
+			aw_dbg("%s pinctrl not ready\n", __func__);
 			rc = -EPROBE_DEFER;
 			return rc;
 		}
-		aw_info("%s Target does not use pinctrl\n", __func__);
+		aw_dbg("%s Target does not use pinctrl\n", __func__);
 		awinic->awinic_pinctrl = NULL;
 		rc = -EINVAL;
 		return rc;
@@ -566,13 +566,13 @@ static int awinic_i2c_probe(struct i2c_client *i2c,
 		struct pinctrl_state *state =
 			pinctrl_lookup_state(awinic->awinic_pinctrl, n);
 		if (!IS_ERR(state)) {
-			aw_info("%s: found pin control %s\n", __func__, n);
+			aw_dbg("%s: found pin control %s\n", __func__, n);
 			awinic->pinctrl_state[i] = state;
 			awinic->enable_pin_control = 1;
 			awinic_set_interrupt(awinic);
 			continue;
 		}
-		aw_info("%s cannot find '%s'\n", __func__, n);
+		aw_dbg("%s cannot find '%s'\n", __func__, n);
 
 	}
 
@@ -651,10 +651,10 @@ static int awinic_i2c_probe(struct i2c_client *i2c,
 				goto err_aw8697_irq;
 			}
 		} else {
-			aw_info("%s skipping IRQ registration\n", __func__);
+			aw_dbg("%s skipping IRQ registration\n", __func__);
 			/* disable feature support if gpio was invalid */
 			awinic->aw8697->flags |= AW8697_FLAG_SKIP_INTERRUPTS;
-			aw_info("%s: aw8697_irq failed.\n", __func__);
+			aw_dbg("%s: aw8697_irq failed.\n", __func__);
 		}
 
 		awinic->aw8697->work_queue = create_singlethread_workqueue("aw8697_vibrator_work_queue");
@@ -758,10 +758,10 @@ static int awinic_i2c_probe(struct i2c_client *i2c,
 				goto err_aw86927_irq;
 			}
 		} else {
-			aw_info("%s skipping IRQ registration\n", __func__);
+			aw_dbg("%s skipping IRQ registration\n", __func__);
 			/* disable feature support if gpio was invalid */
 			awinic->aw86927->flags |= AW86927_FLAG_SKIP_INTERRUPTS;
-			aw_info("%s: aw86927_irq failed.\n", __func__);
+			aw_dbg("%s: aw86927_irq failed.\n", __func__);
 		}
 
 		awinic->aw86927->work_queue = create_singlethread_workqueue("aw86927_vibrator_work_queue");
@@ -818,11 +818,11 @@ static int awinic_i2c_probe(struct i2c_client *i2c,
 	dev_set_drvdata(&i2c->dev, awinic);
 	ret =  create_rb();
 	if (ret < 0) {
-		aw_info("%s error creating ringbuffer\n", __func__);
+		aw_dbg("%s error creating ringbuffer\n", __func__);
 		goto err_rb;
 	}
 
-	aw_info("%s awinic driver version %s\n", __func__, AW_DRIVER_VERSION);
+	aw_dbg("%s awinic driver version %s\n", __func__, AW_DRIVER_VERSION);
 
 	return 0;
 

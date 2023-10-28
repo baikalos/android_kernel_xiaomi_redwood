@@ -275,9 +275,9 @@ static int aw882xx_startup(struct snd_pcm_substream *substream,
 static int aw882xx_set_fmt(struct snd_soc_dai *dai, unsigned int fmt)
 {
 	/*struct aw882xx *aw882xx = aw_snd_soc_codec_get_drvdata(dai->codec);*/
-	aw_snd_soc_codec_t *codec = aw_get_codec(dai);
+	/*aw_snd_soc_codec_t *codec = aw_get_codec(dai);
 
-	aw_dev_info(codec->dev, "fmt=0x%x", fmt);
+	aw_dev_info(codec->dev, "fmt=0x%x", fmt);*/
 
 	return 0;
 }
@@ -299,6 +299,7 @@ static int aw882xx_hw_params(struct snd_pcm_substream *substream,
 			struct snd_pcm_hw_params *params,
 			struct snd_soc_dai *dai)
 {
+    /*
 	aw_snd_soc_codec_t *codec = aw_get_codec(dai);
 	struct aw882xx *aw882xx =
 		aw_componet_codec_ops.codec_get_drvdata(codec);
@@ -312,6 +313,7 @@ static int aw882xx_hw_params(struct snd_pcm_substream *substream,
 		aw_dev_info(aw882xx->dev, "stream playback requested rate: %d, sample size: %d",
 				params_rate(params), params_width(params));
 	}
+    */
 
 	return 0;
 }
@@ -1141,14 +1143,14 @@ static int aw882xx_set_copp_en(struct snd_kcontrol *kcontrol,
 static int aw882xx_get_copp_en(struct snd_kcontrol *kcontrol,
 	struct snd_ctl_elem_value *ucontrol)
 {
-	aw_snd_soc_codec_t *codec =
-		aw_componet_codec_ops.kcontrol_codec(kcontrol);
-	struct aw882xx *aw882xx =
-		aw_componet_codec_ops.codec_get_drvdata(codec);
+	//aw_snd_soc_codec_t *codec =
+	//	aw_componet_codec_ops.kcontrol_codec(kcontrol);
+	//struct aw882xx *aw882xx =
+	//	aw_componet_codec_ops.codec_get_drvdata(codec);
 
 	ucontrol->value.integer.value[0] = g_algo_copp_en;
 
-	aw_dev_dbg(aw882xx->dev, "done nothing");
+	//aw_dev_dbg(aw882xx->dev, "done nothing");
 	return 0;
 }
 
@@ -2308,15 +2310,15 @@ static ssize_t aw882xx_print_dbg_store(struct device *dev,
 				const char *buf, size_t count)
 {
 	int ret;
-	struct aw882xx *aw882xx = dev_get_drvdata(dev);
+	//struct aw882xx *aw882xx = dev_get_drvdata(dev);
 
 	ret = kstrtouint(buf, 0, &g_print_dbg);
 	if (ret < 0)
 		return ret;
 
-	g_print_dbg = ((g_print_dbg == false) ? false : true);
+	g_print_dbg = false; // ((g_print_dbg == false) ? false : true);
 
-	aw_dev_info(aw882xx->dev, "set g_print_dbg : [%d]", g_print_dbg);
+	//aw_dev_info(aw882xx->dev, "set g_print_dbg : [%d]", g_print_dbg);
 
 	return count;
 }

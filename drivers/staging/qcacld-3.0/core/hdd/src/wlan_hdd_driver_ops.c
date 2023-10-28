@@ -1295,7 +1295,7 @@ static int __wlan_hdd_bus_suspend(struct wow_enable_params wow_params)
 	 */
 	pld_request_bus_bandwidth(hdd_ctx->parent_dev, PLD_BUS_WIDTH_NONE);
 
-	hdd_info("bus suspend succeeded");
+    hdd_info("bus suspend succeeded");
 	return 0;
 
 resume_txrx:

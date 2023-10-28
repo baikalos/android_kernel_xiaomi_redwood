@@ -317,6 +317,7 @@ static void hal_rx_dump_msdu_start_tlv_6750(void *msdustart, uint8_t dbg_level)
 static void hal_rx_dump_msdu_end_tlv_6750(void *msduend,
 					  uint8_t dbg_level)
 {
+    /*
 	struct rx_msdu_end *msdu_end = (struct rx_msdu_end *)msduend;
 
 	__QDF_TRACE_RL(dbg_level, QDF_MODULE_ID_DP,
@@ -422,6 +423,7 @@ static void hal_rx_dump_msdu_end_tlv_6750(void *msduend,
 		       msdu_end->fisa_timeout,
 		       msdu_end->cumulative_l4_checksum,
 		       msdu_end->cumulative_ip_length);
+    */
 }
 
 /*

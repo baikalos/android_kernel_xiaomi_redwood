@@ -1024,8 +1024,8 @@ QDF_STATUS hif_try_complete_tasks(struct hif_softc *scn)
 				tasklet, grp_tasklet, work);
 			return QDF_STATUS_E_FAULT;
 		}
-		hif_info("waiting for tasklets %d grp tasklets %d work %d",
-			 tasklet, grp_tasklet, work);
+		//hif_info("waiting for tasklets %d grp tasklets %d work %d",
+		//	 tasklet, grp_tasklet, work);
 		msleep(10);
 	}
 
