@@ -2311,6 +2311,7 @@ static int spi_geni_resume(struct device *dev)
 
 static int spi_geni_suspend(struct device *dev)
 {
+    /*
 	int ret = 0;
 	struct spi_master *spi = get_spi_master(dev);
 	struct spi_geni_master *geni_mas = spi_master_get_devdata(spi);
@@ -2324,6 +2325,8 @@ static int spi_geni_suspend(struct device *dev)
 
 	GENI_SE_ERR(geni_mas->ipc, true, dev, ":%s: End\n", __func__);
 	return ret;
+    */
+    return 0;
 }
 #else
 static int spi_geni_runtime_suspend(struct device *dev)
