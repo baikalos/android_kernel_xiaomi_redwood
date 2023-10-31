@@ -284,6 +284,8 @@ struct dsi_panel {
 	bool fod_hbm_enabled;
 	bool fod_hbm_requested;
 	bool fod_ui;
+    bool hbm_enabled;
+    bool flat_mode_enabled;
 	int local_hbm_on_1000nit_51_index;
 };
 
@@ -427,5 +429,7 @@ int dsi_panel_get_fod_hbm(struct dsi_panel *panel);
 int dsi_panel_apply_requested_fod_hbm(struct dsi_panel *panel);
 void dsi_panel_set_fod_ui(struct dsi_panel *panel, bool status);
 void dsi_panel_request_fod_hbm(struct dsi_panel *panel, bool status);
+void dsi_panel_apply_hbm(struct dsi_panel *panel);
+void dsi_panel_apply_flat_mode(struct dsi_panel *panel);
 
 #endif /* _DSI_PANEL_H_ */
