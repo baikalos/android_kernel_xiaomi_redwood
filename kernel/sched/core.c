@@ -7412,7 +7412,7 @@ static int sched_colocate_write(struct cgroup_subsys_state *css,
 		return -EPERM;
 
 	tg->wtg.colocate = !!colocate;
-	tg->wtg.colocate_update_disabled = true;
+	//tg->wtg.colocate_update_disabled = true;
 	return 0;
 }
 #else
