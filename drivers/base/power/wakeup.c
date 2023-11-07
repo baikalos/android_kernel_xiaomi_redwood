@@ -118,9 +118,9 @@ struct wakeup_source *wakeup_source_create(const char *name)
 		goto err_id;
 	ws->id = id;
 
-    if( !strncmp(name,"[timerfd20_system_server]",25) ) {
-       ws->disable = true;
-    }
+    //if( !strncmp(name,"[timerfd20_system_server]",25) ) {
+    //   ws->disable = true;
+    //}
 
 	return ws;
 
@@ -604,7 +604,7 @@ static void wakeup_source_report_event(struct wakeup_source *ws, bool hard)
 	if (!ws->active)
 		wakeup_source_activate(ws);
 
-	if (hard)
+	if (hard && ws->active)
 		pm_system_wakeup();
 }
 
