@@ -179,8 +179,8 @@
 
 		qcom,sde-cdp-setting = <1 1>, <1 0>;
 
-		qcom,sde-qos-cpu-mask = <0x70>;
-		qcom,sde-qos-cpu-mask-performance = <0x70>;
+		qcom,sde-qos-cpu-mask = <0x0f>;
+		qcom,sde-qos-cpu-mask-performance = <0xf0>;
 		qcom,sde-qos-cpu-dma-latency = <43>;
 		qcom,sde-qos-cpu-irq-latency = <43>;
 
