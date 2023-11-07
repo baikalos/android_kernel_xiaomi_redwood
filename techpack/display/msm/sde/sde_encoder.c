@@ -172,11 +172,11 @@ static void _sde_encoder_pm_qos_add_request(struct drm_encoder *drm_enc)
 	cpu_dma_latency = sde_kms->catalog->perf.cpu_dma_latency;
 	cpumask_clear(&sde_enc->valid_cpu_mask);
 
-	if (sde_enc->mode_info.frame_rate > DEFAULT_FPS)
+	if (sde_enc->mode_info.frame_rate > DEFAULT_FPS_PERF)
 		cpu_mask = to_cpumask(&sde_kms->catalog->perf.cpu_mask_perf);
-	if (!cpu_mask &&
+	if (!cpu_mask /*&&
 			sde_encoder_check_curr_mode(drm_enc,
-				MSM_DISPLAY_CMD_MODE))
+				MSM_DISPLAY_CMD_MODE)*/)
 		cpu_mask = to_cpumask(&sde_kms->catalog->perf.cpu_mask);
 
 	if (!cpu_mask)

@@ -819,8 +819,8 @@ static int _sde_connector_update_dirty_properties(
 		c_conn->colorspace_updated = false;
 		sde_connector_set_colorspace(c_conn);
 
-        sde_connector_apply_hbm(c_conn);
-        sde_connector_apply_flat_mode(c_conn);
+        //sde_connector_apply_hbm(c_conn);
+        //sde_connector_apply_flat_mode(c_conn);
 	}
 
 	/*
@@ -831,8 +831,8 @@ static int _sde_connector_update_dirty_properties(
 		_sde_connector_update_bl_scale(c_conn);
 		c_conn->bl_scale_dirty = false;
 
-        sde_connector_apply_hbm(c_conn);
-        sde_connector_apply_flat_mode(c_conn);
+        //sde_connector_apply_hbm(c_conn);
+        //sde_connector_apply_flat_mode(c_conn);
 	}
 
 	return 0;
