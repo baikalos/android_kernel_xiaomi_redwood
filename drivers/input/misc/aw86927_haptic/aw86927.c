@@ -3573,6 +3573,23 @@ static int aw86927_haptic_effect_strength(struct aw86927 *aw86927)
 	aw_dbg("%s: aw86927->play.vmax_mv =0x%x\n", __func__,
 		 aw86927->play.vmax_mv);
 
+
+#if 1
+	switch (aw86927->play.vmax_mv) {
+	case AW86927_LIGHT_MAGNITUDE:
+		aw86927->level = 0x30;
+		break;
+	case AW86927_MEDIUM_MAGNITUDE:
+		aw86927->level = 0x50;
+		break;
+	case AW86927_STRONG_MAGNITUDE:
+		aw86927->level = 0x80;
+		break;
+	default:
+        aw86927->level = 0x80;
+		break;
+	}
+#else
 	if (aw86927->play.vmax_mv >= 0x7FFF)
 		aw86927->level = 0x80; /*128*/
 	else if (aw86927->play.vmax_mv <= 0x3FFF)
@@ -3581,6 +3598,7 @@ static int aw86927_haptic_effect_strength(struct aw86927 *aw86927)
 		aw86927->level = (aw86927->play.vmax_mv - 16383) / 128;
 	if (aw86927->level < 0x1E)
 		aw86927->level = 0x1E; /*30*/
+#endif
 
 	aw_dbg("%s: aw86927->level =0x%x\n", __func__, aw86927->level);
 	return 0;
