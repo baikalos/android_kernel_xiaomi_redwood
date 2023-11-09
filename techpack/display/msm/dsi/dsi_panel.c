@@ -3841,8 +3841,8 @@ void dsi_panel_apply_hbm(struct dsi_panel *panel) {
 	if (!panel->panel_initialized)
 		goto exit;
 
-	if( panel->hbm_enabled ) dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_ON);
-    else dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_OFF);
+	//if( panel->hbm_enabled ) dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_ON);
+    //else dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_OFF);
 
 exit:
 	mutex_unlock(&panel->panel_lock);
@@ -3853,8 +3853,8 @@ void dsi_panel_apply_flat_mode(struct dsi_panel *panel) {
 	if (!panel->panel_initialized)
 		goto exit;
 
-	if( panel->flat_mode_enabled ) dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_ON);
-    else dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_OFF);
+	//if( panel->flat_mode_enabled ) dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_ON);
+    //else dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_OFF);
 
 exit:
 	mutex_unlock(&panel->panel_lock);
@@ -3868,8 +3868,8 @@ void dsi_panel_request_hbm(struct dsi_panel *panel, bool status)
 
 	panel->hbm_enabled = status;
 
-	if( status ) dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_ON);
-    else dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_OFF);
+	//if( status ) dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_ON);
+    //else dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_HBM_OFF);
 
 exit:
 	mutex_unlock(&panel->panel_lock);
@@ -3883,8 +3883,8 @@ void dsi_panel_request_flat_mode(struct dsi_panel *panel, bool status)
 
 	panel->flat_mode_enabled = status;
 
-	if( status ) dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_FLAT_MODE_ON);
-    else dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_FLAT_MODE_OFF);
+	//if( status ) dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_FLAT_MODE_ON);
+    //else dsi_panel_tx_cmd_set(panel, DSI_CMD_SET_MI_FLAT_MODE_OFF);
 
 exit:
 	mutex_unlock(&panel->panel_lock);
