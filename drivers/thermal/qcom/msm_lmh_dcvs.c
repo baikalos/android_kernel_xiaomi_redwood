@@ -385,7 +385,7 @@ static int limits_dcvs_probe(struct platform_device *pdev)
 	hw->is_irq_enabled = true;
 	ret = devm_request_threaded_irq(&pdev->dev, hw->irq_num, NULL,
 		lmh_dcvs_handle_isr, IRQF_TRIGGER_HIGH | IRQF_ONESHOT
-		| IRQF_SHARED, hw->sensor_name, hw);
+		| IRQF_NO_SUSPEND | IRQF_SHARED, hw->sensor_name, hw);
 	if (ret) {
 		pr_err("Error registering for irq. err:%d\n", ret);
 		ret = 0;
