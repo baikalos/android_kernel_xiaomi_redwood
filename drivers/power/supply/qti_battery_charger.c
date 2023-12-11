@@ -1070,6 +1070,7 @@ static int battery_psy_set_charge_current_limit(struct battery_chg_dev *bcdev,
 
 	if(val == bcdev->curr_restrict_level)
 	      return 0;
+
 	pr_err("set restrict-level: %d num_thermal_levels: %d \n", val, bcdev->num_thermal_levels);
 
 	if (!bcdev->num_thermal_levels)

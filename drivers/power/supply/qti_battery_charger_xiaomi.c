@@ -1658,7 +1658,7 @@ static ssize_t wlscharge_control_limit_store(struct class *c,
 		return -EINVAL;
 	}
 
-	if (val < 0 || val >= bcdev->num_thermal_levels)
+	if (val < 0 || val > bcdev->num_thermal_levels)
 		return -EINVAL;
 
 	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_XM],
