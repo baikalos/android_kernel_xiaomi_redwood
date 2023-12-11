@@ -1441,13 +1441,10 @@ static void __queue_work(int cpu, struct workqueue_struct *wq,
 	if (unlikely(wq->flags & __WQ_DRAINING) &&
 	    WARN_ON_ONCE(!is_chained_work(wq)))
 		return;
-		
-	/*if (req_cpu == WORK_CPU_UNBOUND)
-		cpu = wq_select_unbound_cpu(0);*/
 
     rcu_read_lock();
 
-    if (req_cpu == WORK_CPU_UNBOUND) {
+/*    if (req_cpu == WORK_CPU_UNBOUND) {
 	    if (wq->flags & WQ_UNBOUND) {
             cpu = wq_select_unbound_cpu(0);
 		    pwq = unbound_pwq_by_node(wq, cpu_to_node(cpu));
@@ -1457,6 +1454,7 @@ static void __queue_work(int cpu, struct workqueue_struct *wq,
         }
         goto firsttry;
 	}
+*/
 	
 retry:
 	/* pwq which will be used unless @work is executing elsewhere */
@@ -1470,7 +1468,7 @@ retry:
 		pwq = per_cpu_ptr(wq->cpu_pwqs, cpu);
 	}
 
-firsttry:
+//firsttry:
 	/*
 	 * If @work was previously on a different pool, it might still be
 	 * running there, in which case the work needs to be queued on that
@@ -6012,12 +6010,12 @@ int __init workqueue_init_early(void)
 	}
 
 	system_wq = alloc_workqueue("events", 0, 0);
-	system_highpri_wq = alloc_workqueue("events_highpri", WQ_HIGHPRI | WQ_POWER_EFFICIENT, 0);
-	system_long_wq = alloc_workqueue("events_long", WQ_POWER_EFFICIENT, 0);
+	system_highpri_wq = alloc_workqueue("events_highpri", WQ_HIGHPRI /*| WQ_POWER_EFFICIENT*/, 0);
+	system_long_wq = alloc_workqueue("events_long", /*WQ_POWER_EFFICIENT*/ 0, 0);
 	system_unbound_wq = alloc_workqueue("events_unbound", WQ_UNBOUND,
 					    WQ_UNBOUND_MAX_ACTIVE);
 	system_freezable_wq = alloc_workqueue("events_freezable",
-					      WQ_FREEZABLE | WQ_POWER_EFFICIENT, 0);
+					      WQ_FREEZABLE /*| WQ_POWER_EFFICIENT*/, 0);
 	system_power_efficient_wq = alloc_workqueue("events_power_efficient",
 					      WQ_POWER_EFFICIENT, 0);
 	system_freezable_power_efficient_wq = alloc_workqueue("events_freezable_power_efficient",
