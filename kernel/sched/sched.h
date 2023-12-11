@@ -2319,11 +2319,21 @@ static inline unsigned long cpu_util_cum(int cpu, int delta)
 
 extern unsigned int capacity_margin_freq;
 
+extern int sched_load_boost_plus;
+extern int sched_load_boost_gold;
+extern int sched_load_boost_silver;
+
+static inline int baikal_sched_boost(int cpu) {
+    if( cpu > 6 ) return sched_load_boost_plus;
+    else if( cpu > 4 ) return sched_load_boost_gold;
+    else return sched_load_boost_silver;
+}
+
 static inline unsigned long
 add_capacity_margin(unsigned long cpu_capacity, int cpu)
 {
 	cpu_capacity  = cpu_capacity * capacity_margin_freq *
-			(100 + per_cpu(sched_load_boost, cpu));
+			(100 + baikal_sched_boost(cpu));
 	cpu_capacity /= 100;
 	cpu_capacity /= SCHED_CAPACITY_SCALE;
 	return cpu_capacity;

@@ -615,7 +615,8 @@ __cpu_util_freq_walt(int cpu, struct walt_cpu_load *walt_load)
 	unsigned long capacity = capacity_orig_of(cpu);
 	int boost;
 
-	boost = per_cpu(sched_load_boost, cpu);
+	boost = baikal_sched_boost(cpu);
+
 	util_unboosted = util = freq_policy_load(rq);
 	util = div64_u64(util * (100 + boost),
 			walt_cpu_util_freq_divisor);

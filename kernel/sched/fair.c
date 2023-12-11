@@ -24,8 +24,23 @@
 
 #include <trace/events/sched.h>
 #include <trace/hooks/sched.h>
+#include <linux/moduleparam.h>
 
 #include "walt/walt.h"
+
+#ifdef MODULE_PARAM_PREFIX
+#undef MODULE_PARAM_PREFIX
+#endif
+#define MODULE_PARAM_PREFIX "sched."
+
+int sched_load_boost_plus = 0;
+module_param(sched_load_boost_plus, int, 0664);
+
+int sched_load_boost_gold = 0;
+module_param(sched_load_boost_gold, int, 0664);
+
+int sched_load_boost_silver = 0;
+module_param(sched_load_boost_silver, int, 0664);
 
 #ifdef CONFIG_SMP
 static inline bool task_fits_max(struct task_struct *p, int cpu);
