@@ -1026,52 +1026,50 @@ static struct power_supply_desc usb_psy_desc = {
 	.property_is_writeable	= usb_psy_prop_is_writeable,
 };
 
-static int __battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
-					u32 fcc_ua)
+static int __battery_psy_set_charge_current(struct battery_chg_dev *bcdev) 
 {
-	int rc;
+    int rc = 0, prev = -1;
+  	struct psy_state *pst = NULL;
+ 
+    int rval = max_t(int, bcdev->curr_baikalos_thermal_level, bcdev->curr_input_limit_level);
 
-	if (bcdev->restrict_chg_en) {
-		fcc_ua = min_t(u32, fcc_ua, bcdev->restrict_fcc_ua);
-		fcc_ua = min_t(u32, fcc_ua, bcdev->thermal_fcc_ua);
+   	pst = &bcdev->psy_list[PSY_TYPE_BATTERY];
+
+	rc = read_property_id(bcdev, pst, BATT_CHG_CTRL_LIM);
+	if (rc < 0) {
+		pr_err("Failed to read prop BATT_CHG_CTRL_LIM_MAX, rc=%d\n",
+			rc);
+		//return rc;
 	}
+
+	prev = pst->prop[BATT_CHG_CTRL_LIM];
+
+    if( rval == prev /*bcdev->curr_charging_level*/ ) return 0;
+
+	pr_info("_battery_psy_set_charge_current: %d -> %d\n", prev, rval);
 
 	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_BATTERY],
-				BATT_CHG_CTRL_LIM, fcc_ua);
-	if (rc < 0) {
-		pr_err("Failed to set FCC %u, rc=%d\n", fcc_ua, rc);
-	} else {
-		pr_debug("Set FCC to %u uA\n", fcc_ua);
-		bcdev->last_fcc_ua = fcc_ua;
-	}
-
-	return rc;
-}
-
-static int _battery_psy_set_charge_current(struct battery_chg_dev *bcdev) {
-
-    int rval = max_t(int, bcdev->curr_baikalos_thermal_level, bcdev->curr_restrict_level);
-
-	int rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_BATTERY],
 				BATT_CHG_CTRL_LIM, rval);
 	if (rc < 0) {
 		pr_err("Failed to set ccl:%d, rc=%d\n", rval, rc);
 		return -EINVAL;
     }
+
+    bcdev->curr_charging_level = rval;
+
     return rc;
 }
 
+static int battery_psy_update_charge_current(struct battery_chg_dev *bcdev)
+{
+    return __battery_psy_set_charge_current(bcdev);
+}
 
-static int battery_psy_set_charge_current_limit(struct battery_chg_dev *bcdev,
-					int val)
+static int battery_psy_set_charge_input_limit(struct battery_chg_dev *bcdev, int val)
 {
 	int rc;
-	//u32 fcc_ua, prev_fcc_ua;
 
-	if(val == bcdev->curr_restrict_level)
-	      return 0;
-
-	pr_err("set restrict-level: %d num_thermal_levels: %d \n", val, bcdev->num_thermal_levels);
+	pr_info("set input limit: %d num_thermal_levels: %d \n", val, bcdev->num_thermal_levels);
 
 	if (!bcdev->num_thermal_levels)
 		return 0;
@@ -1081,18 +1079,19 @@ static int battery_psy_set_charge_current_limit(struct battery_chg_dev *bcdev,
 		return -EINVAL;
 	}
 
-	if (val < 0 || val > bcdev->num_thermal_levels)
-		return -EINVAL;
-
-    bcdev->curr_restrict_level = val;
-
-    rc = _battery_psy_set_charge_current(bcdev);
-
-	if (rc < 0) {
-		pr_err("Failed to set thermal-level:%d, rc=%d\n", val, rc);
+	if (val < 0 /*|| val > bcdev->num_thermal_levels*/) {
+        pr_err("set input limit: Incorrect val %d\n", val);
 		return -EINVAL;
     }
-	//bcdev->curr_thermal_level = val;
+
+    bcdev->curr_input_limit_level = val;
+
+    rc = __battery_psy_set_charge_current(bcdev);
+
+	if (rc < 0) {
+		pr_err("Failed to set input limit:%d, rc=%d\n", val, rc);
+		return -EINVAL;
+    }
 	return rc;
 }
 
@@ -1159,15 +1158,11 @@ static int baikalos_override_thermal_level(struct battery_chg_dev *bcdev, int va
         }
 }
 
-static int battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
-					int val)
+static int battery_psy_set_charge_thermal_limit(struct battery_chg_dev *bcdev, int val)
 {
 	int rc, pval;
-	//u32 fcc_ua, prev_fcc_ua;
 
-	if(val == bcdev->curr_thermal_level)
-	      return 0;
-	pr_err("set thermal-level: %d num_thermal_levels: %d \n", val, bcdev->num_thermal_levels);
+	pr_err("set thermal limit: %d num_thermal_levels: %d \n", val, bcdev->num_thermal_levels);
 
 	if (!bcdev->num_thermal_levels)
 		return 0;
@@ -1177,21 +1172,22 @@ static int battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
 		return -EINVAL;
 	}
 
-	if (val < 0 || val > bcdev->num_thermal_levels)
+	if (val < 0 || val > bcdev->num_thermal_levels) {
+        pr_err("set themal limit: Incorrect val %d num_thermal_levels %d\n", val, bcdev->num_thermal_levels);
 		return -EINVAL;
-
-    bcdev->curr_thermal_level = val;
+    }
 
     pval = baikalos_override_thermal_level(bcdev, val);
     
-    bcdev->curr_baikalos_thermal_level = pval;
-
-    rc = _battery_psy_set_charge_current(bcdev);
+    rc = __battery_psy_set_charge_current(bcdev);
 
 	if (rc < 0) {
-		pr_err("Failed to set thermal-level:%d, rc=%d\n", pval, rc);
+		pr_err("Failed to set thermal limit:%d, rc=%d\n", pval, rc);
 		return -EINVAL;
     }
+
+    bcdev->curr_baikalos_thermal_level = pval;
+    bcdev->curr_thermal_level = val;
 	return rc;
 }
 
@@ -1249,7 +1245,7 @@ static int battery_psy_get_prop(struct power_supply *psy,
 		pval->intval = bcdev->num_thermal_levels;
 		break;
     case POWER_SUPPLY_PROP_INPUT_POWER_LIMIT:
-		pval->intval = bcdev->curr_restrict_level;
+		pval->intval = bcdev->curr_input_limit_level;
         break;
 	case POWER_SUPPLY_PROP_TIME_TO_FULL_AVG:
 		pval->intval = (pst->prop[prop_id] * 30) >= 65535 ? 65535 : (pst->prop[prop_id] * 30);
@@ -1281,15 +1277,15 @@ static int battery_psy_set_prop(struct power_supply *psy,
 
 	switch (prop) {
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:
-        pr_debug("POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:%d",pval->intval);
-		return battery_psy_set_charge_current(bcdev, pval->intval);
+        pr_info("POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:%d",pval->intval);
+		return battery_psy_set_charge_thermal_limit(bcdev, pval->intval);
 
 	case POWER_SUPPLY_PROP_INPUT_POWER_LIMIT:
-        pr_debug("POWER_SUPPLY_PROP_INPUT_POWER_LIMIT:%d",pval->intval);
-		return battery_psy_set_charge_current_limit(bcdev, pval->intval);
+        pr_info("POWER_SUPPLY_PROP_INPUT_POWER_LIMIT:%d",pval->intval);
+		return battery_psy_set_charge_input_limit(bcdev, pval->intval);
 
 	case POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:
-        pr_debug("POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:%d",pval->intval);
+        pr_info("POWER_SUPPLY_PROP_CONSTANT_CHARGE_CURRENT:%d",pval->intval);
 		rc = battery_psy_set_fcc(bcdev, prop_id, pval->intval);
 		break;
 	default:
@@ -1376,7 +1372,7 @@ static int power_supply_read_temp(struct thermal_zone_device *tzd,
 
 	time_now = ktime_get();
 	delta = ktime_ms_delta(time_now, last_read_time);
-	if(delta < 5000){
+	if(delta < 3000){
 		batt_temp = last_temp;
 	} else {
 		rc = read_property_id(bcdev, pst, XM_PROP_THERMAL_TEMP);
@@ -1389,12 +1385,14 @@ static int power_supply_read_temp(struct thermal_zone_device *tzd,
 
     if( prev_batt_temp != batt_temp || delta > 10000 ) {
 
-    	pr_info("batt_thermal temp=%d delta=%ld blank_state=%d chg_type=%s tl=%d btl=%d ffc=%d pd_verifed=%d apdo_max=%d\n",
+    	pr_info("batt_thermal temp=%d delta=%ld blank_state=%d chg_type=%s tl=%d btl=%d ill=%d rll=%d ffc=%d pd_verifed=%d apdo_max=%d\n",
 	    	batt_temp,delta, bcdev->blank_state, power_supply_usb_type_text[pst->prop[XM_PROP_REAL_TYPE]],
-		    bcdev->curr_thermal_level, bcdev->curr_baikalos_thermal_level, pst->prop[XM_PROP_FASTCHGMODE], pst->prop[XM_PROP_PD_VERIFED], pst->prop[XM_PROP_APDO_MAX]);
+		    bcdev->curr_thermal_level, bcdev->curr_baikalos_thermal_level, 
+            bcdev->curr_input_limit_level, bcdev->curr_charging_level,
+            pst->prop[XM_PROP_FASTCHGMODE], pst->prop[XM_PROP_PD_VERIFED], pst->prop[XM_PROP_APDO_MAX]);
 
         prev_batt_temp = batt_temp;
-        battery_psy_set_charge_current_limit(bcdev,bcdev->curr_thermal_level);
+        battery_psy_update_charge_current(bcdev);
     }
 
 	return 0;
@@ -1450,7 +1448,7 @@ static void battery_chg_subsys_up_work(struct work_struct *work)
 {
 	struct battery_chg_dev *bcdev = container_of(work,
 					struct battery_chg_dev, subsys_up_work);
-	int rc;
+	int rc = 0;
 
 	battery_chg_notify_enable(bcdev);
 
@@ -1462,13 +1460,14 @@ static void battery_chg_subsys_up_work(struct work_struct *work)
 	msleep(200);
 
 	if (bcdev->last_fcc_ua) {
-		rc = __battery_psy_set_charge_current(bcdev,
-				bcdev->last_fcc_ua);
+		//rc = __battery_psy_set_charge_current(bcdev,
+		//		bcdev->last_fcc_ua);
+        battery_psy_update_charge_current(bcdev);
 		if (rc < 0)
 			pr_err("Failed to set FCC (%u uA), rc=%d\n",
 				bcdev->last_fcc_ua, rc);
         else 
-            pr_debug("last_fcc_ua: set FCCUA=%d", bcdev->last_fcc_ua);
+            pr_info("last_fcc_ua: set FCCUA=%d", bcdev->last_fcc_ua);
 
 	}
 
@@ -1479,7 +1478,7 @@ static void battery_chg_subsys_up_work(struct work_struct *work)
 			pr_err("Failed to set ICL(%u uA), rc=%d\n",
 				bcdev->usb_icl_ua, rc);
         else 
-            pr_debug("usb_icl_ua: set ICL=%d", bcdev->usb_icl_ua);
+            pr_info("usb_icl_ua: set ICL=%d", bcdev->usb_icl_ua);
 	}
 }
 
@@ -1767,21 +1766,11 @@ static ssize_t restrict_cur_store(struct class *c, struct class_attribute *attr,
 {
 	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
 						battery_class);
-	int rc;
+
 	u32 fcc_ua, prev_fcc_ua;
 
-	if (kstrtou32(buf, 0, &fcc_ua) || fcc_ua > bcdev->thermal_fcc_ua)
+	if (kstrtou32(buf, 0, &fcc_ua) /*|| fcc_ua > bcdev->thermal_fcc_ua*/)
 		return -EINVAL;
-
-	prev_fcc_ua = bcdev->restrict_fcc_ua;
-	bcdev->restrict_fcc_ua = fcc_ua;
-	if (bcdev->restrict_chg_en) {
-		rc = __battery_psy_set_charge_current(bcdev, fcc_ua);
-		if (rc < 0) {
-			bcdev->restrict_fcc_ua = prev_fcc_ua;
-			return rc;
-		}
-	}
 
 	return count;
 }
@@ -1807,11 +1796,13 @@ static ssize_t restrict_chg_store(struct class *c, struct class_attribute *attr,
 	if (kstrtobool(buf, &val))
 		return -EINVAL;
 
+    /*
 	bcdev->restrict_chg_en = val;
 	rc = __battery_psy_set_charge_current(bcdev, bcdev->restrict_chg_en ?
 			bcdev->restrict_fcc_ua : bcdev->thermal_fcc_ua);
 	if (rc < 0)
 		return rc;
+    */
 
 	return count;
 }
@@ -2089,8 +2080,8 @@ static int battery_chg_parse_dt(struct battery_chg_dev *bcdev)
 		return 0;
 
 	len = rc;
+    pr_info("qcom,thermal-mitigation size=%d",len);
 
-#if 0
 	rc = read_property_id(bcdev, pst, BATT_CHG_CTRL_LIM_MAX);
 	if (rc < 0) {
 		pr_err("Failed to read prop BATT_CHG_CTRL_LIM_MAX, rc=%d\n",
@@ -2098,6 +2089,7 @@ static int battery_chg_parse_dt(struct battery_chg_dev *bcdev)
 		return rc;
 	}
 
+#if 0
 	prev = pst->prop[BATT_CHG_CTRL_LIM_MAX];
 
 	for (i = 0; i < len; i++) {
@@ -2128,6 +2120,7 @@ static int battery_chg_parse_dt(struct battery_chg_dev *bcdev)
 	 */
 
 	bcdev->thermal_levels[0] = pst->prop[BATT_CHG_CTRL_LIM_MAX];
+    pr_info("BATT_CHG_CTRL_LIM_MAX=%d",bcdev->thermal_levels[0]);
 
 	rc = of_property_read_u32_array(node, "qcom,thermal-mitigation",
 					&bcdev->thermal_levels[1], len);
@@ -2505,3 +2498,4 @@ module_platform_driver(battery_chg_driver);
 
 MODULE_DESCRIPTION("QTI Glink battery charger driver");
 MODULE_LICENSE("GPL v2");
+

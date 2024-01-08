@@ -437,9 +437,9 @@ struct battery_chg_dev {
 	struct extcon_dev		*extcon;
 	u32				*thermal_levels;
 	const char			*wls_fw_name;
-	int				curr_restrict_level;
-	int				curr_charging_level;
+	int				curr_input_limit_level;
 	int				curr_thermal_level;
+	int				curr_charging_level;
 	int				curr_baikalos_thermal_level;
 
 	int				curr_wlsthermal_level;
