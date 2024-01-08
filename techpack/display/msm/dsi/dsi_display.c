@@ -6184,6 +6184,7 @@ int dsi_display_dev_probe(struct platform_device *pdev)
 	node = pdev->dev.of_node;
 	if (boot_disp->boot_disp_en) {
 		/* The panel name should be same as UEFI name index */
+        DSI_INFO("Looking for %s in dt\n", boot_disp->name);
 		panel_node = of_find_node_by_name(mdp_node, boot_disp->name);
 		if (!panel_node)
 			DSI_WARN("panel_node %s not found\n", boot_disp->name);
@@ -7628,9 +7629,9 @@ int dsi_display_set_mode(struct dsi_display *display,
 		goto error;
 	}
 
-	DSI_INFO("mdp_transfer_time=%d, hactive=%d, vactive=%d, fps=%d\n",
-			adj_mode.priv_info->mdp_transfer_time_us,
-			timing.h_active, timing.v_active, timing.refresh_rate);
+	//DSI_INFO("mdp_transfer_time=%d, hactive=%d, vactive=%d, fps=%d\n",
+	//		adj_mode.priv_info->mdp_transfer_time_us,
+	//		timing.h_active, timing.v_active, timing.refresh_rate);
 	SDE_EVT32(adj_mode.priv_info->mdp_transfer_time_us,
 			timing.h_active, timing.v_active, timing.refresh_rate);
 
@@ -8537,12 +8538,13 @@ int dsi_display_enable(struct dsi_display *display)
 
 		goto error;
 	}
-	//if (display->panel->mi_cfg.panel_id == 0x4D323000360200){
+	if (display->panel->mi_panel_id == 0x4D323000360200 
+     || display->panel->mi_panel_id == 0x4D323000420D00) {
 		rc = dsi_panel_gamma_switch(display->panel);
 		if (rc) {
     		DSI_ERR("failed to swith gamma, rc=%d\n",rc);
 		}
-	//}
+	}
 
 	if (display->config.panel_mode == DSI_OP_VIDEO_MODE) {
 		DSI_DEBUG("%s:enable video timing eng\n", __func__);
