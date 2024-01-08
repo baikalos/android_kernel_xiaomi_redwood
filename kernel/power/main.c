@@ -437,7 +437,7 @@ late_initcall(pm_debugfs_init);
  * show() returns whether printing of suspend and resume times is enabled.
  * store() accepts 0 or 1.  0 disables printing and 1 enables it.
  */
-bool pm_print_times_enabled;
+bool pm_print_times_enabled = 1;
 
 static ssize_t pm_print_times_show(struct kobject *kobj,
 				   struct kobj_attribute *attr, char *buf)
@@ -480,7 +480,7 @@ static ssize_t pm_wakeup_irq_show(struct kobject *kobj,
 
 power_attr_ro(pm_wakeup_irq);
 
-bool pm_debug_messages_on __read_mostly;
+bool pm_debug_messages_on __read_mostly = 1;
 
 static ssize_t pm_debug_messages_show(struct kobject *kobj,
 				      struct kobj_attribute *attr, char *buf)
@@ -864,6 +864,9 @@ static ssize_t pm_freeze_timeout_store(struct kobject *kobj,
 				       const char *buf, size_t n)
 {
 	unsigned long val;
+
+    if (IS_ENABLED(CONFIG_ANDROID))
+		return n;
 
 	if (kstrtoul(buf, 10, &val))
 		return -EINVAL;

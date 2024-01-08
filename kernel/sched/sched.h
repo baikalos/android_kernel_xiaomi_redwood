@@ -2325,7 +2325,7 @@ extern int sched_load_boost_silver;
 
 static inline int baikal_sched_boost(int cpu) {
     if( cpu > 6 ) return sched_load_boost_plus;
-    else if( cpu > 4 ) return sched_load_boost_gold;
+    else if( cpu > 3 ) return sched_load_boost_gold;
     else return sched_load_boost_silver;
 }
 
