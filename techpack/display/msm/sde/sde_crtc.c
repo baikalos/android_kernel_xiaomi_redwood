@@ -204,7 +204,7 @@ static int _sde_debugfs_fps_status_show(struct seq_file *s, void *data)
 	fps_int = (unsigned int) sde_crtc->fps_info.measured_fps;
 	fps_float = do_div(fps_int, 10);
 
-	seq_printf(s, "fps: %llu.%llu\n", fps_int, fps_float);
+	seq_printf(s, "%llu.%llu\n", fps_int, fps_float);
 
 	return 0;
 }
@@ -368,7 +368,7 @@ static ssize_t measured_fps_show(struct device *device,
 
     baikal_fps = fps_decimal > 4 ? fps_int+1 : fps_int;
 
-	return scnprintf(buf, PAGE_SIZE, "fps: %d,%d\n", baikal_fps, cur_refresh_rate);
+	return scnprintf(buf, PAGE_SIZE, "%d,%d\n", baikal_fps, cur_refresh_rate);
 
 }
 
