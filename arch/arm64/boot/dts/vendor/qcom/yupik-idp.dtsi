@@ -343,7 +343,7 @@
 };
 
 &battery_charger {
-	qcom,thermal-mitigation = <3000000 1500000 1000000 500000>;
+	qcom,thermal-mitigation = <3000000 1500000 1000000 0>;
 };
 
 &pm7325b_tz {
