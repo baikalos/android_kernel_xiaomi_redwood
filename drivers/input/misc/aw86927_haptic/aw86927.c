@@ -3574,7 +3574,7 @@ static int aw86927_haptic_effect_strength(struct aw86927 *aw86927)
 		 aw86927->play.vmax_mv);
 
 
-#if 1
+#if 0
 	switch (aw86927->play.vmax_mv) {
 	case AW86927_LIGHT_MAGNITUDE:
 		aw86927->level = 0x30;
@@ -3590,14 +3590,16 @@ static int aw86927_haptic_effect_strength(struct aw86927 *aw86927)
 		break;
 	}
 #else
-	if (aw86927->play.vmax_mv >= 0x7FFF)
+	if (aw86927->play.vmax_mv > AW86927_MEDIUM_MAGNITUDE)
 		aw86927->level = 0x80; /*128*/
-	else if (aw86927->play.vmax_mv <= 0x3FFF)
-		aw86927->level = 0x1E; /*30*/
+	else if (aw86927->play.vmax_mv > AW86927_LIGHT_MAGNITUDE)
+		aw86927->level = 0x50; /*30*/
 	else
-		aw86927->level = (aw86927->play.vmax_mv - 16383) / 128;
-	if (aw86927->level < 0x1E)
-		aw86927->level = 0x1E; /*30*/
+        aw86927->level = 0x30;
+
+//		aw86927->level = (aw86927->play.vmax_mv - 16383) / 128;
+//	if (aw86927->level < 0x1E)
+//		aw86927->level = 0x1E; /*30*/
 #endif
 
 	aw_dbg("%s: aw86927->level =0x%x\n", __func__, aw86927->level);
