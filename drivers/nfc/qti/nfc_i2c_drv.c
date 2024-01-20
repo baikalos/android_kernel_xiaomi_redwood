@@ -158,7 +158,7 @@ ssize_t nfc_i2c_dev_read(struct file *filp, char __user *buf,
 						       !i2c_dev->irq_enabled);
 
 				if (ret) {
-					pr_err("error wakeup of read wq\n");
+					//pr_err("error wakeup of read wq\n");
 					goto err;
 				}
 			}

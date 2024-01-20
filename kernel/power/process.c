@@ -138,12 +138,12 @@ int freeze_processes(void)
 		atomic_inc(&system_freezing_cnt);
 
 	pm_wakeup_clear(0);
-	pr_info("Freezing user space processes ... ");
+	//pr_info("Freezing user space processes ... ");
 	pm_freezing = true;
 	error = try_to_freeze_tasks(true);
 	if (!error) {
 		__usermodehelper_set_disable_depth(UMH_DISABLED);
-		pr_cont("done.");
+		//pr_cont("done.");
 	}
 	pr_cont("\n");
 	BUG_ON(in_atomic());
@@ -174,14 +174,14 @@ int freeze_kernel_threads(void)
 {
 	int error;
 
-	pr_info("Freezing remaining freezable tasks ... ");
+	//pr_info("Freezing remaining freezable tasks ... ");
 
 	pm_nosig_freezing = true;
 	error = try_to_freeze_tasks(false);
-	if (!error)
-		pr_cont("done.");
+	//if (!error)
+		//pr_cont("done.");
 
-	pr_cont("\n");
+	//pr_cont("\n");
 	BUG_ON(in_atomic());
 
 	if (error)
@@ -202,7 +202,7 @@ void thaw_processes(void)
 
 	oom_killer_enable();
 
-	pr_info("Restarting tasks ... ");
+	//pr_info("Restarting tasks ... ");
 
 	__usermodehelper_set_disable_depth(UMH_FREEZING);
 	thaw_workqueues();
@@ -223,7 +223,7 @@ void thaw_processes(void)
 	usermodehelper_enable();
 
 	schedule();
-	pr_cont("done.\n");
+	//pr_cont("done.\n");
 	trace_suspend_resume(TPS("thaw_processes"), 0, false);
 }
 
@@ -232,7 +232,7 @@ void thaw_kernel_threads(void)
 	struct task_struct *g, *p;
 
 	pm_nosig_freezing = false;
-	pr_info("Restarting kernel threads ... ");
+	//pr_info("Restarting kernel threads ... ");
 
 	thaw_workqueues();
 
@@ -244,5 +244,5 @@ void thaw_kernel_threads(void)
 	read_unlock(&tasklist_lock);
 
 	schedule();
-	pr_cont("done.\n");
+	//pr_cont("done.\n");
 }
