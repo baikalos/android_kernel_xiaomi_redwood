@@ -73,7 +73,7 @@ extern void *icnss_ipc_soc_wake_context;
 	} while (0)
 
 #define icnss_pr_soc_wake(_fmt, ...) do {                               \
-	pr_debug(_fmt, ##__VA_ARGS__);                                  \
+	pr_info(_fmt, ##__VA_ARGS__);                                  \
 	icnss_ipc_soc_wake_string(pr_fmt(_fmt), ##__VA_ARGS__);         \
 	} while (0)
 

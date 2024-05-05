@@ -3934,7 +3934,7 @@ MODULE_DEVICE_TABLE(of, icnss_dt_match);
 static void icnss_init_control_params(struct icnss_priv *priv)
 {
 	priv->ctrl_params.qmi_timeout = WLFW_TIMEOUT;
-	priv->ctrl_params.quirks = ICNSS_QUIRKS_DEFAULT;
+	priv->ctrl_params.quirks = 0; // ICNSS_QUIRKS_DEFAULT;
 	priv->ctrl_params.bdf_type = ICNSS_BDF_TYPE_DEFAULT;
 
 	if (of_property_read_bool(priv->pdev->dev.of_node,

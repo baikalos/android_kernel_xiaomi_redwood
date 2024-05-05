@@ -251,7 +251,7 @@ static void fts_gesture_report(struct input_dev *input_dev, int gesture_id)
 {
     int gesture;
 
-    FTS_DEBUG("gesture_id:0x%x", gesture_id);
+    FTS_INFO("gesture_id:0x%x", gesture_id);
     switch (gesture_id) {
     case GESTURE_LEFT:
         gesture = KEY_GESTURE_LEFT;
@@ -304,7 +304,7 @@ static void fts_gesture_report(struct input_dev *input_dev, int gesture_id)
     }
     /* report event key */
     if (gesture != -1) {
-        FTS_DEBUG("Gesture Code=%d", gesture);
+        FTS_INFO("Gesture Code=%d", gesture);
         input_report_key(input_dev, gesture, 1);
         input_sync(input_dev);
         input_report_key(input_dev, gesture, 0);
