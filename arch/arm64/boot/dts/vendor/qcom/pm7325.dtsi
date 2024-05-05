@@ -40,7 +40,7 @@
 
 		trips {
 			pm7325_trip0: trip0 {
-				temperature = <95000>;
+				temperature = <100000>;
 				hysteresis = <0>;
 				type = "passive";
 			};
