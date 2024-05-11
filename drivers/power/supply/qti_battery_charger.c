@@ -1101,7 +1101,7 @@ static int baikalos_override_thermal_level(struct battery_chg_dev *bcdev, int va
         int rc, pval, batt_temp, sconfig;
 
                                // 29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46
-        int level_default[] =   {  0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 3, 5, 5, 8,11,11,15 };
+        int level_default[] =   {  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 5, 8,11,11,15 };
         int level_cool[] =      {  3, 3, 3, 4, 5, 8,10,10,10,10,11,12,13,14,15,15,15,15 };
         int level_streaming[] = { 10,10,10,10,10,10,10,10,11,11,12,12,13,14,15,15,15,15 };
         int level_dialer[] =    { 12,12,12,12,12,12,12,12,12,12,12,12,13,14,15,15,15,15 };
@@ -1239,7 +1239,8 @@ static int battery_psy_get_prop(struct power_supply *psy,
 #endif
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT:
-		pval->intval = bcdev->curr_thermal_level;
+		//pval->intval = bcdev->curr_thermal_level;
+		pval->intval = bcdev->curr_baikalos_thermal_level;
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT_MAX:
 		pval->intval = bcdev->num_thermal_levels;
