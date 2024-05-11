@@ -4881,6 +4881,7 @@ enum reg_phymode reg_get_max_phymode(struct wlan_objmgr_pdev *pdev,
 
 	while (1) {
 		if (reg_is_phymode_unallowed(current_phymode, phymode_bitmap)) {
+            pr_info("dot11 mode unallowed %d", current_phymode);
 			if (current_phymode == REG_PHYMODE_11N) {
 				if (REG_IS_24GHZ_CH_FREQ(freq))
 					current_phymode = REG_PHYMODE_11G;
@@ -4897,7 +4898,8 @@ enum reg_phymode reg_get_max_phymode(struct wlan_objmgr_pdev *pdev,
 				current_phymode--;
 			}
 		} else {
-			return current_phymode;
+			//return current_phymode;
+            return REG_PHYMODE_11AX;
 		}
 	}
 }
