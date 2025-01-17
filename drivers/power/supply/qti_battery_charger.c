@@ -175,9 +175,12 @@ int write_property_id(struct battery_chg_dev *bcdev,
 	req_msg.hdr.type = MSG_TYPE_REQ_RESP;
 	req_msg.hdr.opcode = pst->opcode_set;
 
-	if (pst->psy)
-		pr_info("psy: %s prop_id: %u val: %u\n", pst->psy->desc->name,
-			req_msg.property_id, val);
+	if (pst->psy) {
+        if( prop_id == BATT_CHG_CTRL_LIM ) {
+	    	pr_info("psy: %s prop_id: %u val: %u\n", pst->psy->desc->name,
+		    	req_msg.property_id, val);
+        }
+    }
 
 	return battery_chg_write(bcdev, &req_msg, sizeof(req_msg));
 }
@@ -194,9 +197,12 @@ int read_property_id(struct battery_chg_dev *bcdev,
 	req_msg.hdr.type = MSG_TYPE_REQ_RESP;
 	req_msg.hdr.opcode = pst->opcode_get;
 
-	if (pst->psy)
-		pr_debug("psy: %s prop_id: %u\n", pst->psy->desc->name,
-			req_msg.property_id);
+	if (pst->psy) {
+        if( prop_id == BATT_CHG_CTRL_LIM ) {
+	    	pr_info("psy: %s prop_id: %u\n", pst->psy->desc->name,
+		    	req_msg.property_id);
+        }
+    }
 
 	return battery_chg_write(bcdev, &req_msg, sizeof(req_msg));
 }
@@ -1101,7 +1107,7 @@ static int baikalos_override_thermal_level(struct battery_chg_dev *bcdev, int va
         int rc, pval, batt_temp, sconfig;
 
                                // 29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46
-        int level_default[] =   {  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 5, 8,11,11,15 };
+        int level_default[] =   {  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 8,11,11,15 };
         int level_cool[] =      {  3, 3, 3, 4, 5, 8,10,10,10,10,11,12,13,14,15,15,15,15 };
         int level_streaming[] = { 10,10,10,10,10,10,10,10,11,11,12,12,13,14,15,15,15,15 };
         int level_dialer[] =    { 12,12,12,12,12,12,12,12,12,12,12,12,13,14,15,15,15,15 };
@@ -1384,7 +1390,7 @@ static int power_supply_read_temp(struct thermal_zone_device *tzd,
 
 	*temp = batt_temp * 1000;
 
-    if( prev_batt_temp != batt_temp || delta > 10000 ) {
+    if( prev_batt_temp != batt_temp || delta > 5000 ) {
 
     	pr_info("batt_thermal temp=%d delta=%ld blank_state=%d chg_type=%s tl=%d btl=%d ill=%d rll=%d ffc=%d pd_verifed=%d apdo_max=%d\n",
 	    	batt_temp,delta, bcdev->blank_state, power_supply_usb_type_text[pst->prop[XM_PROP_REAL_TYPE]],
