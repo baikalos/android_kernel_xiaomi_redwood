@@ -68,6 +68,7 @@ static bool dload_mode_enabled;
 static void *emergency_dload_mode_addr;
 
 static bool force_warm_reboot;
+module_param(force_warm_reboot, bool, 0664);
 
 static struct notifier_block restart_nb;
 
