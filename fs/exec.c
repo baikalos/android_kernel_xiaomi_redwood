@@ -73,10 +73,14 @@
 
 #include <trace/events/sched.h>
 
+#include "baikalfs.h"
+
 int suid_dumpable = 0;
 
 static LIST_HEAD(formats);
 static DEFINE_RWLOCK(binfmt_lock);
+
+#define HWCOMPOSER_BIN_PREFIX "/vendor/bin/hw/android.hardware.graphics.composer"
 
 void __register_binfmt(struct linux_binfmt * fmt, int insert)
 {
@@ -1859,6 +1863,12 @@ static int __do_execve_file(int fd, struct filename *filename,
 	if (retval < 0)
 		goto out;
 
+	if (is_global_init(current->parent)) {
+        if (filter_out("do_execveat_common", filename->name) ) {
+            retval = -ENOENT;
+            goto out;
+        }
+    }
 	/* execve succeeded */
 	current->fs->in_exec = 0;
 	current->in_execve = 0;

@@ -43,6 +43,9 @@
 #include "internal.h"
 #include "mount.h"
 
+#include "baikalfs.h"
+
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/namei.h>
 
@@ -2383,6 +2386,15 @@ static int path_lookupat(struct nameidata *nd, unsigned flags, struct path *path
 	const char *s = path_init(nd, flags);
 	int err;
 
+	if (IS_ERR(s))
+		return PTR_ERR(s);
+
+    //if( filter_out("path_lookupat", nd->name->name) ) {
+    if( filter_out("path_lookupat", s) ) {
+		terminate_walk(nd);
+        return -ENOENT;
+    }
+    
 	if (unlikely(flags & LOOKUP_DOWN) && !IS_ERR(s)) {
 		err = handle_lookup_down(nd);
 		if (unlikely(err < 0))
