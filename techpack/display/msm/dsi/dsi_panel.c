@@ -1580,10 +1580,10 @@ qsync_support:
 		panel->qsync_caps.qsync_min_fps = 0;
 
 error:
-	if (rc < 0) {
+	//if (/*rc < 0*/) {
 		qsync_caps->qsync_min_fps = 0;
 		qsync_caps->qsync_min_fps_list_len = 0;
-	}
+	//}
 	return rc;
 }
 
