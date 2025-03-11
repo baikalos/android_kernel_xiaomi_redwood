@@ -86,6 +86,8 @@ static inline bool is_filtered_uid(uid_t uid) {
 
 static void print_debug(const char *tag, const char *name) {
 
+    if( name == NULL ) return;
+
     uid_t uid = get_cur_uid();
 
     if( filter_debug_all != 0 || 
@@ -110,6 +112,12 @@ static const char* bl_list_mounts[] = {
 	"/dev/zygisk",
     "/sys/fs/pstore",
     "/dev/usb-ffs/adb",
+    "/dev/ffs-diag",
+    "/dev/ffs-diag-1",
+    "/dev/ffs-diag-2",
+    "/sys/kernel/tracing",
+    "/sys/kernel/debug",
+    "/sys/kernel/debug/tracing",
     NULL
 };
 
@@ -140,14 +148,23 @@ static const char *bl_list_ends[] = {
 };
 
 static const char *bl_list_contains[] = {
+    "adbd",
     "zygisk",
     "magisk",
     "system/addon.d",
+    "system/Addon.d",
     "com.noshufou.android.su",
     "supersu",
     "busybox",
-    "xposed",
+    "xposed.prop",
+    "libxposed",
+    "xposed.installer",
     "Xposed",
+    "-recovery.sh",
+    "vendor_sepolicy.cil",
+    "compatibility_matrix.device.xml",
+    "gapps.rc",
+    "/adb/",
     NULL
 };
 
@@ -158,6 +175,7 @@ static const char *bl_list_eq[] = {
     "/dev/socket/adbd",
     "/sdcard/TWRP",
     "/storage/emulated/0/TWRP",
+    "Addon.d"
     "addon.d",
     ".TWRP",
     "TWRP",
@@ -183,6 +201,7 @@ static int check_list(const char *list[], const char *name, int type) {
 
     int res = 0;
     int i;
+    if( !name ) return 0;
     for( i=0;;i++ ) { 
         if( !list[i] ) break;
         switch(type) {
@@ -210,6 +229,7 @@ static int check_list(const char *list[], const char *name, int type) {
 int filter_out_name(const char *tag, const char *name) {
     int res = 0;
 
+    if( !name ) return 0;
     if( !res ) res = check_list(bl_list_contains, name, 0);
     if( !res ) res = check_list(bl_list_ends, name, 1);
     if( !res ) res = check_list(bl_list_eq, name, 2);
@@ -223,6 +243,8 @@ int filter_out_name(const char *tag, const char *name) {
 }
 
 int filter_out(const char *tag, const char *name) {
+
+    if( !name ) return 0;
 
     print_debug(tag, name);
 
@@ -238,6 +260,8 @@ int filter_out_path(const char *tag, const struct path* const file) {
 	char* path = NULL;
 	char* ptr = NULL;
 	char* end = NULL;
+
+    if( !file ) return 0;
 
     if( !filter_from_user_apps || is_root_uid() ) return 0;
 
@@ -282,6 +306,8 @@ int filter_out_mount(const char *tag, struct vfsmount* const mnt, const struct p
 	char* path = NULL;
 	char* ptr = NULL;
 	char* end = NULL;
+
+    if( !mnt || !root ) return 0;
 
 	struct path mnt_path = {
 		.dentry = mnt->mnt_root,

@@ -3610,7 +3610,7 @@ static struct file *path_openat(struct nameidata *nd,
 			const struct open_flags *op, unsigned flags)
 {
 	struct file *file;
-	int error;
+	int error = 0;
 
 	file = alloc_empty_file(op->open_flag, current_cred());
 	if (IS_ERR(file))
@@ -3622,11 +3622,24 @@ static struct file *path_openat(struct nameidata *nd,
 		error = do_o_path(nd, flags, file);
 	} else {
 		const char *s = path_init(nd, flags);
-		while (!(error = link_path_walk(s, nd)) &&
-			(error = do_last(nd, file, op)) > 0) {
-			nd->flags &= ~(LOOKUP_OPEN|LOOKUP_CREATE|LOOKUP_EXCL);
-			s = trailing_symlink(nd);
-		}
+
+        if( filter_out("path_openat", s) ) {
+            // terminate_walk(nd);
+            error = -ENOENT;
+        }
+
+        if( !error ) {
+    		while (!(error = link_path_walk(s, nd)) &&
+    			(error = do_last(nd, file, op)) > 0) {
+    			nd->flags &= ~(LOOKUP_OPEN|LOOKUP_CREATE|LOOKUP_EXCL);
+    			s = trailing_symlink(nd);
+                /*if( filter_out("path_openat", s) ) {
+                    //terminate_walk(nd);
+                    error = -ENOENT;
+                    break;
+                }*/
+    		}
+        }
 		terminate_walk(nd);
 	}
 	if (likely(!error)) {
