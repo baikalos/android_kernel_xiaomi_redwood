@@ -417,6 +417,7 @@ static void nav_event_input(struct gf_dev *gf_dev, gf_nav_event_t nav_event)
 	}
 }
 
+#endif
 
 static void gf_kernel_key_input(struct gf_dev *gf_dev, struct gf_key *gf_key)
 {
@@ -452,8 +453,6 @@ static void gf_kernel_key_input(struct gf_dev *gf_dev, struct gf_key *gf_key)
 		input_sync(gf_dev->input);
 	}
 }
-#endif
-
 
 static long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
@@ -520,7 +519,7 @@ static long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		gf_hw_reset(gf_dev, 3);
 		break;
 
-#if defined(SUPPORT_NAV_EVENT)
+
 	case GF_IOC_INPUT_KEY_EVENT:
 		if (copy_from_user(&gf_key, (struct gf_key *)arg, sizeof(struct gf_key))) {
 			pr_debug("Failed to copy input key event from user to kernel\n");
@@ -531,6 +530,7 @@ static long gf_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		gf_kernel_key_input(gf_dev, &gf_key);
 		break;
 
+#if defined(SUPPORT_NAV_EVENT)
 	case GF_IOC_NAV_EVENT:
 		pr_debug("%s GF_IOC_NAV_EVENT\n", __func__);
 
