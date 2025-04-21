@@ -52,8 +52,9 @@ static int filter_uids[2048];
 static int filter_uids_count;
 module_param_array(filter_uids, int, &filter_uids_count, 0640);
 
-
-
+static int filter_uids_add[2048];
+static int filter_uids_add_count;
+module_param_array(filter_uids_add, int, &filter_uids_add_count, 0640);
 
 static inline uid_t get_cur_uid(void) {
     //return __kuid_val(current_uid());
@@ -70,6 +71,17 @@ static inline bool is_root_uid(void) {
     return uid_eq(current_uid(), GLOBAL_ROOT_UID);
 }
 
+
+static inline bool is_add_uid(uid_t uid) {
+    int i;
+
+    if( uid < 10000 ) return 0;
+
+    for(i=0;i<filter_uids_add_count;i++) {
+        if( filter_uids_add[i] == uid ) return 1;
+    }
+    return 0;
+}
 
 static inline bool is_filtered_uid(uid_t uid) {
     int i;
@@ -168,6 +180,14 @@ static const char *bl_list_contains[] = {
     NULL
 };
 
+static const char *bl_list_contains_add[] = {
+    "lineage",
+    "Lineage",
+    "crdroid",
+    "pixel",
+    NULL
+};
+
 static const char *bl_list_eq[] = {
     "/system/addon.d",
     "/data/adbroot",
@@ -233,6 +253,8 @@ int filter_out_name(const char *tag, const char *name) {
     if( !res ) res = check_list(bl_list_contains, name, 0);
     if( !res ) res = check_list(bl_list_ends, name, 1);
     if( !res ) res = check_list(bl_list_eq, name, 2);
+
+    if( !res && is_add_uid(get_cur_uid()) ) res = check_list(bl_list_contains_add, name, 0);
 
     if (res) {
         pr_info("filter_out blocked from %s name=%s (%d)", tag, name, get_cur_uid());
