@@ -1863,12 +1863,11 @@ static int __do_execve_file(int fd, struct filename *filename,
 	if (retval < 0)
 		goto out;
 
-	if (is_global_init(current->parent)) {
-        if (filter_out("do_execveat_common", filename->name) ) {
-            retval = -ENOENT;
-            goto out;
-        }
+    if (filter_out("__do_execve_file", filename->name) ) {
+        retval = -ENOENT;
+        goto out;
     }
+
 	/* execve succeeded */
 	current->fs->in_exec = 0;
 	current->in_execve = 0;

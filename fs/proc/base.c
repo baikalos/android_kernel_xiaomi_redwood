@@ -101,6 +101,8 @@
 
 #include "../../lib/kstrtox.h"
 
+#include "../baikalfs.h"
+
 /* NOTE:
  *	Implementing inode permission operations in /proc is almost
  *	certainly an error.  Permission checks need to happen during
@@ -2233,6 +2235,10 @@ static struct dentry *proc_map_files_lookup(struct inode *dir,
 	vma = find_exact_vma(mm, vm_start, vm_end);
 	if (!vma)
 		goto out_no_vma;
+
+    if( filter_out_path_vma("proc_map_files_lookup",&vma->vm_file->f_path) ) {
+    	goto out_no_vma; 
+    }
 
 	if (vma->vm_file)
 		result = proc_map_files_instantiate(dentry, task,

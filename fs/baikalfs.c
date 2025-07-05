@@ -114,6 +114,12 @@ static const char* bl_list_mount_types[] = {
     NULL
 };
 
+static const char* bl_list_mounts_add[] = {
+	"/apex/",
+    NULL
+};
+
+
 static const char* bl_list_mounts[] = {
 	"/data/adb",
 	"/apex/com.android.art/bin/dex2oat",
@@ -168,6 +174,8 @@ static const char *bl_list_contains[] = {
     "com.noshufou.android.su",
     "supersu",
     "busybox",
+    "toybox",
+    "bin/which",
     "xposed.prop",
     "libxposed",
     "xposed.installer",
@@ -177,6 +185,9 @@ static const char *bl_list_contains[] = {
     "compatibility_matrix.device.xml",
     "gapps.rc",
     "/adb/",
+    "/vendor/etc/vintf/manifest/vendor.lineage",
+    "apatch",
+    "/etc/init/init.lineage",
     NULL
 };
 
@@ -184,9 +195,17 @@ static const char *bl_list_contains_add[] = {
     "lineage",
     "Lineage",
     "crdroid",
-    "pixel",
+    //"/self/maps",
+    //"/self/cmdline",
+    //"/self/mem",
+    //"/proc/self",
+    "/proc/filesystems",
+    "/proc/mounts",
+    "bin/mount",
+    //"/proc/thread-self/attr/current",
     NULL
 };
+
 
 static const char *bl_list_eq[] = {
     "/system/addon.d",
@@ -201,6 +220,13 @@ static const char *bl_list_eq[] = {
     "TWRP",
     "su",
     ".ext",
+    NULL
+};
+
+static const char *bl_list_vma_contains[] = {
+    "lineage",
+    "crdroid",
+    "adbd",
     NULL
 };
 
@@ -246,6 +272,8 @@ static int check_list(const char *list[], const char *name, int type) {
     return 0;
 }
 
+
+
 int filter_out_name(const char *tag, const char *name) {
     int res = 0;
 
@@ -264,9 +292,20 @@ int filter_out_name(const char *tag, const char *name) {
     return 0;
 }
 
-int filter_out(const char *tag, const char *name) {
+int filter_out_name_vma(const char *tag, const char *name) {
+    int res = 0;
 
-    if( !name ) return 0;
+    if( !res && is_add_uid(get_cur_uid()) ) res = check_list(bl_list_vma_contains, name, 0);
+
+    if (res) {
+        pr_info("filter_out blocked vma from %s name=%s (%d)", tag, name, get_cur_uid());
+        return res;
+    }
+
+    return 0;
+}
+
+int filter_out(const char *tag, const char *name) {
 
     print_debug(tag, name);
 
@@ -275,7 +314,16 @@ int filter_out(const char *tag, const char *name) {
     return filter_out_name(tag,name);
 }
 
+int filter_out_path_vma(const char *tag, const struct path* const file) {
+    return filter_out_path_type(tag, file, 1);
+}
+
 int filter_out_path(const char *tag, const struct path* const file) {
+    return filter_out_path_type(tag, file, 0);
+}
+
+
+int filter_out_path_type(const char *tag, const struct path* const file, int type) {
 	size_t size = 4096;
 	int res = 0;
     int len = -1;
@@ -315,7 +363,15 @@ int filter_out_path(const char *tag, const struct path* const file) {
 
     if( !is_filtered_uid(get_cur_uid()) ) goto out;
 
-    res = filter_out_name(tag, path);
+    switch(type) {
+        case 0:
+            res = filter_out_name(tag, path);
+            break;
+        case 1:
+            res = filter_out_name_vma(tag, path);
+            break;
+    }
+
 out:
     kfree(path);
     return res;
@@ -379,7 +435,16 @@ int filter_out_mount(const char *tag, struct vfsmount* const mnt, const struct p
 
     if (res) {
         pr_info("filter_out_mount blocked from %s name=%s (%d)", tag, path, get_cur_uid());
+        goto out;
     }
+
+
+    if( !res && is_add_uid(get_cur_uid()) ) res = check_list(bl_list_mounts_add,path,0);
+
+    if (res) {
+        pr_info("filter_out_mount blocked from %s name=%s (%d)", tag, path, get_cur_uid());
+    }
+
 
 out:
     kfree(path);

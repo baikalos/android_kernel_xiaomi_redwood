@@ -27,6 +27,8 @@
 #include <asm/tlbflush.h>
 #include "internal.h"
 
+#include "../baikalfs.h"
+
 #define SEQ_PUT_DEC(str, val) \
 		seq_put_decimal_ull_width(m, str, (val) << (PAGE_SHIFT-10), 8)
 void task_mem(struct seq_file *m, struct mm_struct *mm)
@@ -385,6 +387,17 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 		name = vma->vm_ops->name(vma);
 		if (name)
 			goto done;
+	}
+
+	if (file) {
+        if( !filter_out_path_vma( "show_map_vma", &file->f_path) ) {
+    		seq_pad(m, ' ');
+	    	seq_file_path(m, file, "\n");
+            goto done;
+        } else {
+            name = "[vdso]";
+            goto done;
+        }
 	}
 
 	name = arch_vma_name(vma);
