@@ -171,6 +171,7 @@ static const char *bl_list_contains[] = {
     "system/addon.d",
     "system/Addon.d",
     "com.noshufou.android.su",
+    //"getprop",
     "supersu",
     "busybox",
     "toybox",
@@ -181,26 +182,32 @@ static const char *bl_list_contains[] = {
     "Xposed",
     "-recovery.sh",
     "vendor_sepolicy.cil",
+    "system_ext_sepolicy.cil",
     "compatibility_matrix.device.xml",
     "gapps.rc",
     "/adb/",
     "/vendor/etc/vintf/manifest/vendor.lineage",
     "apatch",
     "/etc/init/init.lineage",
+    "update_engine",
     NULL
 };
 
 static const char *bl_list_contains_add[] = {
-    "lineage",
-    "Lineage",
+    "lineageos",
     "crdroid",
+    "gapps",
+    "evolution",
+    "magisk",
     //"/self/maps",
     //"/self/cmdline",
     //"/self/mem",
     //"/proc/self",
-    "/proc/filesystems",
-    "/proc/mounts",
-    "bin/mount",
+    //"/proc/filesystems",
+    //"/proc/mounts",
+    //"bin/mount",
+    //"bin/sh",
+    //"bin/",
     //"/proc/thread-self/attr/current",
     NULL
 };
@@ -224,6 +231,7 @@ static const char *bl_list_eq[] = {
 
 static const char *bl_list_vma_contains[] = {
     "lineage",
+    "Lineage",
     "crdroid",
     "adbd",
     NULL
@@ -294,7 +302,7 @@ int filter_out_name(const char *tag, const char *name) {
 int filter_out_name_vma(const char *tag, const char *name) {
     int res = 0;
 
-    if( !res && is_add_uid(get_cur_uid()) ) res = check_list(bl_list_vma_contains, name, 0);
+    if( !res ) res = check_list(bl_list_vma_contains, name, 0);
 
     if (res) {
         pr_info("filter_out blocked vma from %s name=%s (%d)", tag, name, get_cur_uid());

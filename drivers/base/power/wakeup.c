@@ -100,6 +100,13 @@ struct wakeup_source *wakeup_source_create(const char *name)
 		goto err_name;
 	ws->name = ws_name;
 
+    if( strstr(ws_name,"cne_wifi_qos_wl") != NULL ) { 
+        pr_info("wakesource disabled:%s", (ws->name != NULL ? ws->name : "empty") );
+        ws->disable = 1;
+    } else {
+        pr_info("wakesource enabled:%s", (ws->name != NULL ? ws->name : "empty") );
+    }
+
 	id = ida_alloc(&wakeup_ida, GFP_KERNEL);
 	if (id < 0)
 		goto err_id;
@@ -545,6 +552,11 @@ static void wakeup_source_activate(struct wakeup_source *ws)
 	if (WARN_ONCE(wakeup_source_not_registered(ws),
 			"unregistered wakeup source\n"))
 		return;
+
+    if( ws->disable ) {
+        pr_info("wakesource disabled:%s", (ws->name ? ws->name : "empty") );
+        return;
+    }
 
 	ws->active = true;
 	ws->active_count++;

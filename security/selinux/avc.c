@@ -729,7 +729,7 @@ static void avc_audit_post_callback(struct audit_buffer *ab, void *a)
 	audit_log_format(ab, " tclass=%s", secclass_map[sad->tclass-1].name);
 
 	if (sad->denied)
-		audit_log_format(ab, " permissive=%u", sad->result ? 0 : 1);
+		audit_log_format(ab, " permissive=%u", sad->result ? 0 : 0);
 
 	/* in case of invalid context report also the actual context string */
 	rc = security_sid_to_context_inval(sad->state, sad->ssid, &scontext,

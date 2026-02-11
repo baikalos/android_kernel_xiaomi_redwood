@@ -760,8 +760,9 @@ int binder_alloc_mmap_handler(struct binder_alloc *alloc,
 		failure_string = "already mapped";
 		goto err_already_mapped;
 	}
-	alloc->buffer_size = min_t(unsigned long, vma->vm_end - vma->vm_start,
-				   SZ_4M);
+	//alloc->buffer_size = min_t(unsigned long, vma->vm_end - vma->vm_start, SZ_4M);
+	alloc->buffer_size = vma->vm_end - vma->vm_start;
+
 	mutex_unlock(&binder_alloc_mmap_lock);
 
 	alloc->buffer = (void __user *)vma->vm_start;

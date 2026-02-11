@@ -59,7 +59,9 @@ static void patch_flag(char *cmd, const char *flag, const char *val)
 static int __init proc_cmdline_init(void)
 {
     strcpy(new_command_line, saved_command_line);
-	patch_flag(new_command_line, "androidboot.verifiedbootstate=", "green androidboot.vbmeta.digest=e4a2fc5893777eb3b2e68c9070cc4be8e5f4170e12e5fcbe5e9e5685c0b80e3f androidboot.vbmeta.hash_alg=sha256 androidboot.vbmeta.size=4096 androidboot.vbmeta.avb_version=1.1");
+	//patch_flag(new_command_line, "androidboot.verifiedbootstate=", "green androidboot.vbmeta.digest=e4a2fc5893777eb3b2e68c9070cc4be8e5f4170e12e5fcbe5e9e5685c0b80e3f androidboot.vbmeta.hash_alg=sha256 androidboot.vbmeta.size=4096 androidboot.vbmeta.avb_version=1.1");
+	patch_flag(new_command_line, "androidboot.verifiedbootstate=", "green androidboot.vbmeta.digest=718653590076e868afc64c507aa839f03391cb132263f0a336cecf1800d75a07 androidboot.vbmeta.hash_alg=sha256 androidboot.vbmeta.size=4096 androidboot.vbmeta.avb_version=1.2 androidboot.vbmeta.invalidate_on_error=yes");
+
 	patch_flag(new_command_line, "buildvariant=", "user");
 
 	proc_create_single("cmdline", 0, NULL, cmdline_proc_show);

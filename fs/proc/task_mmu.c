@@ -377,11 +377,12 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 	 * Print the dentry name for named mappings, and a
 	 * special [heap] marker for the heap:
 	 */
-	if (file) {
+	
+    /*if (file) {
 		seq_pad(m, ' ');
 		seq_file_path(m, file, "\n");
 		goto done;
-	}
+	}*/
 
 	if (vma->vm_ops && vma->vm_ops->name) {
 		name = vma->vm_ops->name(vma);
@@ -395,7 +396,7 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 	    	seq_file_path(m, file, "\n");
             goto done;
         } else {
-            name = "[vdso]";
+            name = "[naik]";
             goto done;
         }
 	}

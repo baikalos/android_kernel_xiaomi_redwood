@@ -771,25 +771,34 @@ static int usb_psy_set_icl(struct battery_chg_dev *bcdev, u32 prop_id, int val)
 
 	/* Allow this only for SDP or USB_PD and not for other charger types */
 	if (pst->prop[USB_ADAP_TYPE] != POWER_SUPPLY_USB_TYPE_SDP &&
-	    pst->prop[USB_ADAP_TYPE] != POWER_SUPPLY_USB_TYPE_PD)
+	    pst->prop[USB_ADAP_TYPE] != POWER_SUPPLY_USB_TYPE_PD) {
+        pr_err("Set ICL to %u is not allowed for charger type %d\n", val, pst->prop[USB_ADAP_TYPE]);
 		return -EINVAL;
+    }
 
 	/*
 	 * Input current limit (ICL) can be set by different clients. E.g. USB
 	 * driver can request for a current of 500/900 mA depending on the
 	 * port type. Also, clients like EUD driver can pass 0 or -22 to
-	 * suspend or unsuspend the input for its use case.
+	 * suspend or unsusp
+
+    end the input for its use case.
 	 */
 
 	temp = val;
 	if (val < 0)
 		temp = UINT_MAX;
 
+    if( val == 500000 ) {
+        temp = 900000;
+        pr_info("Force USB fast charge ICL to %u\n", temp);
+    }
+
 	rc = write_property_id(bcdev, pst, prop_id, temp);
 	if (rc < 0) {
 		pr_err("Failed to set ICL (%u uA) rc=%d\n", temp, rc);
 	} else {
-		pr_debug("Set ICL to %u\n", temp);
+		pr_info("Set ICL to %u\n", temp);
 		bcdev->usb_icl_ua = temp;
 	}
 
@@ -971,7 +980,7 @@ static int usb_psy_set_prop(struct power_supply *psy,
 
 	switch (prop) {
 	case POWER_SUPPLY_PROP_INPUT_CURRENT_LIMIT:
-        pr_debug("usb_psy_set_prop: set ICL=%d", pval->intval);
+        pr_info("usb_psy_set_prop: set ICL=%d", pval->intval);
 		rc = usb_psy_set_icl(bcdev, prop_id, pval->intval);
 		break;
 	default:

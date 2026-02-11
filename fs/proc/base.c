@@ -386,7 +386,7 @@ static const struct file_operations proc_pid_cmdline_ops = {
 static int proc_pid_wchan(struct seq_file *m, struct pid_namespace *ns,
 			  struct pid *pid, struct task_struct *task)
 {
-	unsigned long wchan;
+/*	unsigned long wchan;
 	char symname[KSYM_NAME_LEN];
 
 	if (!ptrace_may_access(task, PTRACE_MODE_READ_FSCREDS))
@@ -398,7 +398,7 @@ static int proc_pid_wchan(struct seq_file *m, struct pid_namespace *ns,
 		return 0;
 	}
 
-print0:
+print0:*/
 	seq_putc(m, '0');
 	return 0;
 }
