@@ -58,7 +58,7 @@ extern void ksu_ksud_exit();
 int __init kernelsu_init(void)
 {
 	pr_info("kernelsu.enabled=%d\n",
-		(int)get_ksu_state());
+		get_ksu_state());
 
 #ifdef CONFIG_KSU_CMDLINE
 	if (!get_ksu_state()) {
@@ -66,7 +66,6 @@ int __init kernelsu_init(void)
 		return 0;
 	}
 #endif
-
 #ifdef CONFIG_KSU_DEBUG
 	pr_alert("*************************************************************");
 	pr_alert("**     NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE    **");
@@ -85,9 +84,8 @@ int __init kernelsu_init(void)
 
 	ksu_throne_tracker_init();
 
+#ifdef KSU_HOOK_WITH_KPROBES
 	ksu_sucompat_init();
-
-#ifdef CONFIG_KSU_KPROBES_HOOK
 	ksu_ksud_init();
 #else
 	pr_debug("init ksu driver\n");
@@ -114,10 +112,10 @@ void kernelsu_exit(void)
 
 	destroy_workqueue(ksu_workqueue);
 
-#ifdef CONFIG_KSU_KPROBES_HOOK
+#ifdef KSU_HOOK_WITH_KPROBES
 	ksu_ksud_exit();
-#endif
 	ksu_sucompat_exit();
+#endif
 
 	ksu_core_exit();
 }
