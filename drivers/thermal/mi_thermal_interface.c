@@ -77,6 +77,9 @@ static atomic_t temp_state = ATOMIC_INIT(0);
 static atomic_t sconfig = ATOMIC_INIT(10);
 static atomic_t wifi_limit = ATOMIC_INIT(0);
 
+int get_sconfig(void) { return atomic_read(&sconfig); }
+EXPORT_SYMBOL_GPL(get_sconfig);
+
 static const char *board_sensor;
 static char boost[128];
 static char board_sensor_temp[128];

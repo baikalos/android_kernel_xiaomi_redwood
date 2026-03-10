@@ -4890,7 +4890,7 @@ enum reg_phymode reg_get_max_phymode(struct wlan_objmgr_pdev *pdev,
 				current_phymode--;
 			}
 		} else {
-			return current_phymode;
+			return REG_PHYMODE_11AX;
 		}
 	}
 }

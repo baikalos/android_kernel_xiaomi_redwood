@@ -31,6 +31,8 @@
 #include "avc_ss.h"
 #include "classmap.h"
 
+#define CONFIG_AUDIT 1
+
 #define AVC_CACHE_SLOTS			512
 #define AVC_DEF_CACHE_THRESHOLD		512
 #define AVC_CACHE_RECLAIM		16
@@ -672,7 +674,8 @@ static void avc_audit_pre_callback(struct audit_buffer *ab, void *a)
 	const char **perms;
 	int i, perm;
 
-	audit_log_format(ab, "avc:  denied ");
+	//audit_log_format(ab, "avc:  denied ");
+    audit_log_format(ab, "avc:  %s ", sad->denied ? "denied" : "granted");
 
 	if (av == 0) {
 		audit_log_format(ab, " null");
@@ -784,6 +787,7 @@ noinline int slow_avc_audit(struct selinux_state *state,
 	sad.audited = audited;
 	sad.result = result;
 	sad.state = state;
+    sad.denied = denied;
 
 	a->selinux_audit_data = &sad;
 

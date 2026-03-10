@@ -9,7 +9,7 @@
 };
 
 &thermal_zones {
-	socd {
+	/*socd {
 		cooling-maps {
 			socd_cpu4 {
 				trip = <&socd_trip>;
@@ -31,7 +31,7 @@
 				cooling-device = <&cpu7_isolate 1 1>;
 			};
 		};
-	};
+	};*/
 
 	pm7325b-ibat-lvl0 {
 		trips {

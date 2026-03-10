@@ -1080,6 +1080,8 @@ static int __maybe_unused _get_cpu_power(unsigned long *mW, unsigned long *kHz,
 	tmp = (u64)cap * mV * mV * (Hz / 1000000);
 	do_div(tmp, 1000000000);
 
+    pr_info("pd%d: energy_model: cap=%d, mV=%ld, Hz=%ld, tmp=%lu",cpu, cap, mV, Hz, tmp); 
+
 	*mW = (unsigned long)tmp;
 	*kHz = Hz / 1000;
 

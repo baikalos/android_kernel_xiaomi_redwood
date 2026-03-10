@@ -31,6 +31,8 @@
 #endif
 #include "qti_typec_class.h"
 
+int get_sconfig(void);
+
 #define MSG_OWNER_BC			32778
 #define MSG_TYPE_REQ_RESP		1
 #define MSG_TYPE_NOTIFY			2
@@ -88,7 +90,7 @@
 
 #define MAX_THERMAL_LEVEL		16
 
-static int blank_state;
+static int blank_state = 1;
 
 enum uvdm_state {
 	USBPD_UVDM_DISCONNECT,
@@ -1440,12 +1442,12 @@ static int usb_psy_set_icl(struct battery_chg_dev *bcdev, u32 prop_id, int val)
 	if (val < 0)
 		temp = UINT_MAX;
 
-	rc = write_property_id(bcdev, pst, prop_id, temp);
+	rc = 0; // write_property_id(bcdev, pst, prop_id, temp);
 	if (rc < 0) {
 		pr_err("Failed to set ICL (%u uA) rc=%d\n", temp, rc);
 	} else {
-		pr_debug("Set ICL to %u\n", temp);
-		bcdev->usb_icl_ua = temp;
+		pr_info("Set ICL to %u\n", temp);
+		bcdev->usb_icl_ua = 0; // temp;
 	}
 
 	return rc;
@@ -1540,9 +1542,9 @@ static int battery_psy_set_fcc(struct battery_chg_dev *bcdev, u32 prop_id, int v
 	if (val < 0)
 		temp = UINT_MAX;
 
-	rc = write_property_id(bcdev, pst, prop_id, temp);
+	rc = 0; // write_property_id(bcdev, pst, prop_id, temp);
 	if (!rc)
-		pr_debug("Set FCC to %u\n", temp);
+		pr_info("Set FCC to %u\n", temp);
 
 	return rc;
 }
@@ -1668,13 +1670,13 @@ static int __battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
 		fcc_ua = min_t(u32, fcc_ua, bcdev->thermal_fcc_ua);
 	}
 
-	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_BATTERY],
-				BATT_CHG_CTRL_LIM, fcc_ua);
+	rc = 0; //write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_BATTERY],
+			//	BATT_CHG_CTRL_LIM, fcc_ua);
 	if (rc < 0) {
 		pr_err("Failed to set FCC %u, rc=%d\n", fcc_ua, rc);
 	} else {
-		pr_debug("Set FCC to %u uA\n", fcc_ua);
-		bcdev->last_fcc_ua = fcc_ua;
+		pr_info("Set FCC to %u uA\n", fcc_ua);
+		bcdev->last_fcc_ua = 0; // fcc_ua;
 	}
 
 	return rc;
@@ -1689,8 +1691,8 @@ static int battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
 #endif
 
 #ifdef CONFIG_MACH_XIAOMI
-	if (val == bcdev->curr_thermal_level)
-	      return 0;
+	//if (val == bcdev->curr_thermal_level)
+	      //return 0;
 #endif
 
 	if (!bcdev->num_thermal_levels)
@@ -1701,8 +1703,21 @@ static int battery_psy_set_charge_current(struct battery_chg_dev *bcdev,
 		return -EINVAL;
 	}
 
+
+    if( get_sconfig() == 0 ) {
+        struct psy_state *pst = &bcdev->psy_list[PSY_TYPE_XM];
+        rc = read_property_id(bcdev, pst, XM_PROP_THERMAL_TEMP);
+        if( !rc ) {
+            int batt_temp = pst->prop[XM_PROP_THERMAL_TEMP];
+            if( batt_temp > 5 && batt_temp < 40 ) {
+            	pr_info("baikal override from %d to 0, batt_temp=%d\n", val, batt_temp);
+                val = 0;
+            }
+        }
+    }
+
 #ifdef CONFIG_MACH_XIAOMI
-	pr_debug("%d num_thermal_levels: %d \n", val, bcdev->num_thermal_levels);
+	pr_info("%d num_thermal_levels: %d \n", val, bcdev->num_thermal_levels);
 
 	if (val < 0 || val >= bcdev->num_thermal_levels)
 		return -EINVAL;
@@ -5043,7 +5058,7 @@ static void notify_blankstate_changed_work(struct work_struct *work)
 	if (rc < 0)
 		pr_err("%s:write BLANK_STATE failed\n", __func__);
 
-	pr_debug("%s:write BLANK_STATE succeed\n", __func__);
+	pr_info("%s:write BLANK_STATE ignored\n", __func__);
 }
 #endif
 
@@ -5097,7 +5112,7 @@ static int battery_chg_notify(struct notifier_block *self, unsigned long event,
 		break;
 	case DRM_PANEL_BLANK_UNBLANK:
 #ifdef CONFIG_MACH_XIAOMI
-		blank_state = 0;
+		blank_state = 1;
 #endif
 		battery_chg_notify_enable(bcdev);
 		break;

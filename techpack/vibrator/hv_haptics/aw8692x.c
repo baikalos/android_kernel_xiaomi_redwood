@@ -86,6 +86,7 @@ static void aw8692x_set_pwm(struct aw_haptic *aw_haptic, uint8_t mode)
 
 static void aw8692x_set_gain(struct aw_haptic *aw_haptic, uint8_t gain)
 {
+	aw_info("gain = 0x%02x", gain);
 	haptic_hv_i2c_writes(aw_haptic, AW8692X_REG_PLAYCFG2, &gain, AW_I2C_BYTE_ONE);
 }
 

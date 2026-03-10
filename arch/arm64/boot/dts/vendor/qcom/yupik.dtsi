@@ -75,7 +75,7 @@
 			enable-method = "psci";
 			cpu-idle-states = <&SLVR_OFF &SLVR_RAIL_OFF>;
 			capacity-dmips-mhz = <406>;
-			dynamic-power-coefficient = <100>;
+			dynamic-power-coefficient = <120>;
 			qcom,freq-domain = <&cpufreq_hw 0 4>;
 			next-level-cache = <&L2_0>;
 			#cooling-cells = <2>;
@@ -98,7 +98,7 @@
 			enable-method = "psci";
 			cpu-idle-states = <&SLVR_OFF &SLVR_RAIL_OFF>;
 			capacity-dmips-mhz = <406>;
-			dynamic-power-coefficient = <100>;
+			dynamic-power-coefficient = <120>;
 			qcom,freq-domain = <&cpufreq_hw 0 4>;
 			next-level-cache = <&L2_1>;
 			#cooling-cells = <2>;
@@ -116,7 +116,7 @@
 			enable-method = "psci";
 			cpu-idle-states = <&SLVR_OFF &SLVR_RAIL_OFF>;
 			capacity-dmips-mhz = <406>;
-			dynamic-power-coefficient = <100>;
+			dynamic-power-coefficient = <120>;
 			qcom,freq-domain = <&cpufreq_hw 0 4>;
 			next-level-cache = <&L2_2>;
 			#cooling-cells = <2>;
@@ -134,7 +134,7 @@
 			enable-method = "psci";
 			cpu-idle-states = <&SLVR_OFF &SLVR_RAIL_OFF>;
 			capacity-dmips-mhz = <406>;
-			dynamic-power-coefficient = <100>;
+			dynamic-power-coefficient = <120>;
 			qcom,freq-domain = <&cpufreq_hw 0 4>;
 			next-level-cache = <&L2_3>;
 			#cooling-cells = <2>;
@@ -152,7 +152,7 @@
 			enable-method = "psci";
 			cpu-idle-states = <&GOLD_OFF &GOLD_RAIL_OFF>;
 			capacity-dmips-mhz = <1023>;
-			dynamic-power-coefficient = <520>;
+			dynamic-power-coefficient = <565>;
 			qcom,freq-domain = <&cpufreq_hw 1 4>;
 			next-level-cache = <&L2_4>;
 			#cooling-cells = <2>;
@@ -170,7 +170,7 @@
 			enable-method = "psci";
 			cpu-idle-states = <&GOLD_OFF &GOLD_RAIL_OFF>;
 			capacity-dmips-mhz = <1023>;
-			dynamic-power-coefficient = <520>;
+			dynamic-power-coefficient = <565>;
 			qcom,freq-domain = <&cpufreq_hw 1 4>;
 			next-level-cache = <&L2_5>;
 			#cooling-cells = <2>;
@@ -188,7 +188,7 @@
 			enable-method = "psci";
 			cpu-idle-states = <&GOLD_OFF &GOLD_RAIL_OFF>;
 			capacity-dmips-mhz = <1023>;
-			dynamic-power-coefficient = <520>;
+			dynamic-power-coefficient = <565>;
 			qcom,freq-domain = <&cpufreq_hw 1 4>;
 			next-level-cache = <&L2_6>;
 			#cooling-cells = <2>;
@@ -206,7 +206,7 @@
 			enable-method = "psci";
 			cpu-idle-states = <&GOLD_OFF &GOLD_RAIL_OFF>;
 			capacity-dmips-mhz = <1024>;
-			dynamic-power-coefficient = <552>;
+			dynamic-power-coefficient = <640>;
 			qcom,freq-domain = <&cpufreq_hw 2 4>;
 			next-level-cache = <&L2_7>;
 			#cooling-cells = <2>;
