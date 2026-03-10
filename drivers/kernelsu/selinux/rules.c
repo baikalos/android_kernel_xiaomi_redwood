@@ -222,8 +222,6 @@ static void reset_avc_cache()
 
 int handle_sepolicy(unsigned long arg3, void __user *arg4)
 {
-	struct policydb *db;
-
 	if (!arg4) {
 		return -1;
 	}
@@ -268,9 +266,9 @@ int handle_sepolicy(unsigned long arg3, void __user *arg4)
 		subcmd = data.subcmd;
 	}
 
-	mutex_lock(&ksu_rules);
+	rcu_read_lock();
 
-	db = get_policydb();
+	struct policydb *db = get_policydb();
 
 	int ret = -1;
 	if (cmd == CMD_NORMAL_PERM) {
@@ -520,7 +518,7 @@ int handle_sepolicy(unsigned long arg3, void __user *arg4)
 	}
 
 exit:
-	mutex_unlock(&ksu_rules);
+	rcu_read_unlock();
 
 	// only allow and xallow needs to reset avc cache, but we cannot do that because
 	// we are in atomic context. so we just reset it every time.
